@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link rel="stylesheet" href="https://bootswatch.com/4/cerulean/bootstrap.min.css">
+  <link rel="stylesheet" href="styles/styles.css">
+  <title>ToDo List</title>
+</head>
+
+<body>
+  <div class="container mt-4 ">
+    <h1 class="display-4 text-center">To<span class="text-info">Do</span>L<span class="text-info">i</span>s<span
+        class="text-info">t</span></h1>
+
+    <div class='table-responsive '>
+      <table class="table border border-primary rounded-sm">
+        <thead class="thead bg-primary">
+          <tr>
+            <th scope="col" class="text-center align-middle">#</th>
+            <th scope="col" class="d-flex justify-content-between">
+              <p class="text-center align-middle m-auto">Task</p>
+              <form class="p-2">
+                <label for="select">Sort by: </label>
+                <select name="select" class="px-3 bg-primary border rounded-sm select-sort">
+                  <option selected value="1">Status</option>
+                  <option value="2">Duedate</option>
+                </select>
+              </form>
+            </th>
+            <th scope="col" class="text-center align-middle">Duedate</th>
+            <th scope="col" class="text-center align-middle">Status</th>
+            <th scope="col" class="text-center align-middle"></th>
+          </tr>
+        </thead>
+        <tbody>
+
+        </tbody>
+      </table>
+    </div>
+
+    <form id="task-form" class=" my-5 mx-auto border border-primary rounded-sm p-1 form-inline">
+
+
+      <input type="text" id="task-text" class="form-control border form-group mx-auto px-1 w-50"
+        placeholder="Enter new task">
+
+      <div class="d-flex justify-content-center align-items-center">
+        <label for="date" class="mt-2 mr-1 ml-5"> Choose a duedate: </label>
+        <input type="date" id='dueDate' class='form-control border p-1 mr-5 w-75' name="date">
+      </div>
+
+      <input type="submit" value="Add Task" class="btn btn-primary form-control mx-auto">
+    </form>
+
+
+
+  </div>
+  <script src="scripts/script.js"></script>
+</body>
+
+</html>

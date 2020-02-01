@@ -1,0 +1,16 @@
+.table th, table td{
+  border-top: none !important;
+  border-bottom: none !important;
+}
+tr th+th, tr th+td, tr td+td{
+  border-left: 1px solid #dee2e6;
+}
+
+.table tr+tr{
+ border-top: 1px solid #dee2e6;;
+}
+input{
+  font-size: 1rem !important;
+ 
+}
+
