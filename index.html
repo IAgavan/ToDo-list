@@ -27,9 +27,11 @@
                 <select name="select" class="px-3 bg-primary border rounded-sm select-sort">
                   <option selected value="1">Status</option>
                   <option value="2">Duedate</option>
+                  <option value="3">Startdate</option>
                 </select>
               </form>
             </th>
+            <th scope="col" class="text-center align-middle">Startdate</th>
             <th scope="col" class="text-center align-middle">Duedate</th>
             <th scope="col" class="text-center align-middle">Status</th>
             <th scope="col" class="text-center align-middle"></th>
@@ -42,14 +44,19 @@
     </div>
 
     <form id="task-form" class=" my-5 mx-auto border border-primary rounded-sm p-1 form-inline">
+      <h3 class="text-center align-middle mx-auto">Add new task</h3>
 
-
-      <input type="text" id="task-text" class="form-control border form-group mx-auto px-1 w-50"
+      <input type="text" id="task-text" class="form-control border form-group mx-auto px-1 w-100 mb-1"
         placeholder="Enter new task">
+
+        <div class="d-flex justify-content-center align-items-center">
+          <label for="date" class="mt-2 mr-1 ml-5"> Choose a startdate: </label>
+          <input type="date" id='startDate' class='form-control border p-1 mr-5' name="date">
+        </div>
 
       <div class="d-flex justify-content-center align-items-center">
         <label for="date" class="mt-2 mr-1 ml-5"> Choose a duedate: </label>
-        <input type="date" id='dueDate' class='form-control border p-1 mr-5 w-75' name="date">
+        <input type="date" id='dueDate' class='form-control border p-1 mr-5' name="date">
       </div>
 
       <input type="submit" value="Add Task" class="btn btn-primary form-control mx-auto">

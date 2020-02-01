@@ -1,8 +1,9 @@
 // Task Class: создает новую задачу 
 
 class Task {
-  constructor(task, dueDate, id) {
+  constructor(task, startDate, dueDate, id) {
     this.task = task;
+    this.startDate = startDate
     this.dueDate = dueDate;
     this.status = "1";
     this.id = id;
@@ -42,6 +43,7 @@ class UI {
     row.innerHTML = `
     <th scope="row" class="number text-center align-middle">${number}</th>
     <td class="taskText d-flex align-middle"><input type="text" class="textField d-none"><p class="text m-0 ">${task.task}</p> <button class="btn btn-sm btn-primary edit-button ml-auto">Edit</button></td>
+    <td class="text-center align-middle">${task.startDate}</td>
     <td class="text-center align-middle">${task.dueDate}</td>
     <td class="text-center align-middle">
       <select class="custom-select custom-select-sm w-75 px-1">
@@ -135,6 +137,9 @@ class UI {
       case "2":
         key = 'dueDate';
         break;
+      case "3":
+        key = 'startDate';
+        break;
 
     }
     tasks.sort((a, b) => a[key] > b[key] ? 1 : -1);
@@ -157,6 +162,7 @@ class UI {
   // очищаем поля ввода 
   static clearFields() {
     document.querySelector('#task-text').value = '';
+    document.querySelector('#startDate').value = '';
     document.querySelector('#dueDate').value = '';
   }
 }
@@ -187,7 +193,7 @@ class Store {
     const tasks = Store.getTasks();
     tasks.forEach((task) => {
       if (task.id === element.parentElement.parentElement.id) {
-        task[key] = key==="status"? element.value: element.innerText;
+        task[key] = key === "status" ? element.value : element.innerText;
       }
     })
     localStorage.setItem('tasks', JSON.stringify(tasks));
@@ -223,6 +229,7 @@ document.querySelector('#task-form').addEventListener('submit', (evt) => {
 
   // get form input - получаем данные из формы
   const text = document.querySelector('#task-text').value;
+  const startDate = document.querySelector('#startDate').value;
   const dueDate = document.querySelector('#dueDate').value;
 
   // Validation - проверка поля на заполненность
@@ -231,7 +238,7 @@ document.querySelector('#task-form').addEventListener('submit', (evt) => {
   } else {
 
     //Create new task - создаем новую задачу
-    const taskItem = new Task(text, dueDate);
+    const taskItem = new Task(text, startDate, dueDate);
 
     // add task - добавляем задачу в список и в localStorage
     UI.addTasksToList(taskItem);
@@ -260,7 +267,7 @@ document.querySelector('tbody').addEventListener('click', (e) => {
   // Event: edit Task - редактируем задачу в перечне и в localStorage
   if (e.target.classList.contains('edit-button')) {
     UI.editTask(e.target);
-    Store.editTask(e.target.previousElementSibling, 'task');    
+    Store.editTask(e.target.previousElementSibling, 'task');
   }
 
   // event: edit Status - изменяем статус задачи
