@@ -1,3 +1,6 @@
+#task-form{
+  background-color: rgb(174, 225, 238);
+}
 .table th, .table td{
   padding: 0.5rem 0.25rem;
   border-top: none !important;

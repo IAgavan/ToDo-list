@@ -11,6 +11,14 @@ class Task {
 }
 // UI Class: производит UI действия (добавить, удалить, изменить, показать оповещения и др.)
 class UI {
+
+
+
+  static showAndHideElement(selector){
+    
+    document.querySelector(selector).classList.toggle('d-none');
+  }
+
   // показываем задачи из localStorage
   static displayTasks() {
     const tasks = Store.getTasks();
@@ -204,7 +212,9 @@ class Store {
 // Event: display tasks - после загрузки страницы, показываем список задач из localStorage
 document.addEventListener('DOMContentLoaded', UI.displayTasks);
 
-
+document.querySelector('#showTableBtn').addEventListener('click', ()=>{
+  UI.showAndHideElement('.taskTable');
+})
 
 // Event: add Task - добавляем задачу из формы в список
 document.querySelector('#task-form').addEventListener('submit', (evt) => {
