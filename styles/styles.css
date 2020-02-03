@@ -1,4 +1,5 @@
-.table th, table td{
+.table th, .table td{
+  padding: 0.5rem 0.25rem;
   border-top: none !important;
   border-bottom: none !important;
 }
@@ -11,10 +12,25 @@ tr th+th, tr th+td, tr td+td{
 }
 input{
   font-size: 1rem !important;
- 
 }
 
-table input[type='text']{
+
+
+th:nth-child(2){
+  min-width: 400px;
+}
+td:nth-child(4),
+td:nth-child(3),
+th:nth-child(3),
+th:nth-child(4){
+  max-width: 120px;
+}
+
+table input[type="text"]{
+  padding: 0 0.5rem;
+  width: 100%;
+}
+table input{
   border: none;
   background-color: transparent;
 }

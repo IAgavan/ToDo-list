@@ -42,9 +42,9 @@ class UI {
     //наполняем таблицу задачи
     row.innerHTML = `
     <th scope="row" class="number text-center align-middle">${number}</th>
-    <td class="taskText d-flex align-middle"><input type="text" class="textField" value ='${task.task}'</td>
-    <td class="text-center align-middle">${task.startDate}</td>
-    <td class="text-center align-middle">${task.dueDate}</td>
+    <td class="taskText d-flex align-middle"><input type="text" class="textField task" value ='${task.task}'</td>
+    <td class="text-center align-middle"><input type="date" class="date startDate" value='${task.startDate}'></td>
+    <td class="text-center align-middle"><input type="date" class="date dueDate" value='${task.dueDate}'></td>
     <td class="text-center align-middle">
       <select class="custom-select custom-select-sm w-75 px-1">
         <option value="1">In progress</option>
@@ -159,7 +159,7 @@ class Store {
       try {
         tasks = JSON.parse(localStorage.getItem('tasks'));
       } catch (e) {
-        console.log('!!!Невозможно прочитать файл. ' , e)
+        console.log('!!!Невозможно прочитать файл. ', e)
         tasks = [];
       }
     }
@@ -175,25 +175,22 @@ class Store {
   }
 
   //изменяем задачу в массиве
-  static editTask(element, key) {
+  static editTask(key, value, id) {
     const tasks = Store.getTasks();
-    tasks.forEach((task) => {
-      if (task.id === element.parentElement.parentElement.id) {
-        task[key] = element.value;
-      }
-    })
+    const task = tasks.find(task => task.id === id);
+    if (task === undefined) return; 
+    task[key] = value;
     localStorage.setItem('tasks', JSON.stringify(tasks));
   }
 
   // удаляем задачу из массива 
-  static removeTask(element) {
+  static removeTask(id) {
     const tasks = Store.getTasks();
-    const id = element.parentElement.parentElement.id;
-    tasks.forEach((task, index) => {
-      if (task.id === id) {
-        tasks.splice(index, 1)
+    const taskToDeleteIndex = tasks.findIndex(task => task.id === id);
+      if (taskToDeleteIndex !== -1) {
+        tasks.splice(taskToDeleteIndex, 1)
       }
-    })
+    
 
     localStorage.setItem('tasks', JSON.stringify(tasks));
   }
@@ -241,30 +238,36 @@ document.querySelector('#task-form').addEventListener('submit', (evt) => {
 
 
 
-
 // Events: remove/edit 
 document.querySelector('tbody').addEventListener('click', (e) => {
-  // remove Task - удаляем задачу из перечня и из localStorage
-  if (e.target.classList.contains('delete')) {
+
+  const isDeleteButton = e.target.classList.contains('delete');
+  const isTextField = e.target.classList.contains('textField');
+  const isDueDate = e.target.classList.contains('dueDate');
+  const isStartDate = e.target.classList.contains('startDate');
+  const isStatus = e.target.classList.contains('custom-select');
+
+
+  if (isDeleteButton) { // remove Task - удаляем задачу из перечня и из localStorage
     e.preventDefault();
     UI.removeTask(e.target);
-    Store.removeTask(e.target);
+    Store.removeTask(e.target.parentElement.parentElement.id);
     UI.showAlert('Task removed', 'success')
-  }
-
-  // Event: edit Task - редактируем задачу в перечне и в localStorage
-  if (e.target.classList.contains('textField')) {
+  } else if (isTextField) { // edit Task - редактируем задачу в перечне и в localStorage
     e.target.addEventListener('change', () => {
-      Store.editTask(e.target, 'task');
+      Store.editTask('task', e.target.value, e.target.parentElement.parentElement.id);
     })
-
-  }
-
-  // event: edit Status - изменяем статус задачи
-  if (e.target.classList.contains('custom-select')) {
-
+  } else if (isStartDate) {
+    e.target.addEventListener('change', () => {
+      Store.editTask('startDate', e.target.value, e.target.parentElement.parentElement.id);
+    })
+  } else if (isDueDate) {
+    e.target.addEventListener('change', () => {
+      Store.editTask('dueDate', e.target.value, e.target.parentElement.parentElement.id);
+    })
+  } else if (isStatus) {
     UI.statusTask(e.target);
-    Store.editTask(e.target, "status");
+    Store.editTask("status", e.target.value, e.target.parentElement.parentElement.id);
   }
 })
 
