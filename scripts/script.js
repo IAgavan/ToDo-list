@@ -201,7 +201,7 @@ class Store {
 // ~~~~~~~~~~~~~~~~~~~~~EVENTS - СОБЫТИЯ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-// Event: display tasks - после загрузки, показываем список задач из localStorage
+// Event: display tasks - после загрузки страницы, показываем список задач из localStorage
 document.addEventListener('DOMContentLoaded', UI.displayTasks);
 
 
@@ -236,9 +236,7 @@ document.querySelector('#task-form').addEventListener('submit', (evt) => {
 })
 
 
-
-
-// Events: remove/edit 
+// Events: remove/edit tasks
 document.querySelector('tbody').addEventListener('click', (e) => {
 
   const isDeleteButton = e.target.classList.contains('delete');
