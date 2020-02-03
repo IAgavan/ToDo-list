@@ -3,7 +3,7 @@
 class Task {
   constructor(task, startDate, dueDate, id) {
     this.task = task;
-    this.startDate = startDate
+    this.startDate = startDate;
     this.dueDate = dueDate;
     this.status = "1";
     this.id = id;
@@ -42,7 +42,7 @@ class UI {
     //наполняем таблицу задачи
     row.innerHTML = `
     <th scope="row" class="number text-center align-middle">${number}</th>
-    <td class="taskText d-flex align-middle"><input type="text" class="textField d-none"><p class="text m-0 ">${task.task}</p> <button class="btn btn-sm btn-primary edit-button ml-auto">Edit</button></td>
+    <td class="taskText d-flex align-middle"><input type="text" class="textField" value ='${task.task}'</td>
     <td class="text-center align-middle">${task.startDate}</td>
     <td class="text-center align-middle">${task.dueDate}</td>
     <td class="text-center align-middle">
@@ -72,24 +72,24 @@ class UI {
   }
 
   // изменяем задачу в списке
-  static editTask(element) {
-    {
-      const listItem = element.parentElement;
-      const text = listItem.querySelector('.text');
-      const editInput = listItem.querySelector('.textField');
-      const isEditing = text.classList.contains('d-none');
+  // static editTask(element) {
+  //   {
+  //     const listItem = element.parentElement;
+  //     const text = listItem.querySelector('.text');
+  //     const editInput = listItem.querySelector('.textField');
+  //     const isEditing = text.classList.contains('d-none');
 
-      if (isEditing) {
-        text.innerText = editInput.value;
-        element.innerText = 'Edit';
-      } else {
-        editInput.value = text.innerText;
-        element.innerText = 'Save'
-      }
-      text.classList.toggle('d-none');
-      editInput.classList.toggle('d-none');
-    }
-  }
+  //     if (isEditing) {
+  //       text.innerText = editInput.value;
+  //       element.innerText = 'Edit';
+  //     } else {
+  //       editInput.value = text.innerText;
+  //       element.innerText = 'Save'
+  //     }
+  //     text.classList.toggle('d-none');
+  //     editInput.classList.toggle('d-none');
+  //   }
+  // }
 
   // изменяем статус задачи
   static statusTask(element) {
@@ -193,7 +193,7 @@ class Store {
     const tasks = Store.getTasks();
     tasks.forEach((task) => {
       if (task.id === element.parentElement.parentElement.id) {
-        task[key] = key === "status" ? element.value : element.innerText;
+        task[key] = element.value;
       }
     })
     localStorage.setItem('tasks', JSON.stringify(tasks));
@@ -253,6 +253,9 @@ document.querySelector('#task-form').addEventListener('submit', (evt) => {
 })
 
 
+
+
+
 // Events: remove/edit 
 document.querySelector('tbody').addEventListener('click', (e) => {
   // remove Task - удаляем задачу из перечня и из localStorage
@@ -260,14 +263,15 @@ document.querySelector('tbody').addEventListener('click', (e) => {
     e.preventDefault();
     UI.removeTask(e.target);
     Store.removeTask(e.target);
-
-    UI.showAlert('Task removed', 'sucsess')
+    UI.showAlert('Task removed', 'success')
   }
 
   // Event: edit Task - редактируем задачу в перечне и в localStorage
-  if (e.target.classList.contains('edit-button')) {
-    UI.editTask(e.target);
-    Store.editTask(e.target.previousElementSibling, 'task');
+  if (e.target.classList.contains('textField')) {
+    e.target.addEventListener('change', () => {
+      Store.editTask(e.target, 'task');
+    })
+
   }
 
   // event: edit Status - изменяем статус задачи

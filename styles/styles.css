@@ -14,3 +14,7 @@ input{
  
 }
 
+table input[type='text']{
+  border: none;
+  background-color: transparent;
+}
