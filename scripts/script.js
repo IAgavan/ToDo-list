@@ -14,8 +14,8 @@ class UI {
 
 
 
-  static showAndHideElement(selector){
-    
+  static showAndHideElement(selector) {
+
     document.querySelector(selector).classList.toggle('d-none');
   }
 
@@ -141,8 +141,8 @@ class UI {
     div.appendChild(document.createTextNode(message));
 
     const container = document.querySelector('.container');
-    const form = document.querySelector('#task-form');
-    container.insertBefore(div, form);
+    const buttons = document.querySelector('.buttons');
+    container.insertBefore(div, buttons);
 
     setTimeout(() => {
       document.querySelector('.alert').remove()
@@ -186,7 +186,7 @@ class Store {
   static editTask(key, value, id) {
     const tasks = Store.getTasks();
     const task = tasks.find(task => task.id === id);
-    if (task === undefined) return; 
+    if (task === undefined) return;
     task[key] = value;
     localStorage.setItem('tasks', JSON.stringify(tasks));
   }
@@ -195,10 +195,10 @@ class Store {
   static removeTask(id) {
     const tasks = Store.getTasks();
     const taskToDeleteIndex = tasks.findIndex(task => task.id === id);
-      if (taskToDeleteIndex !== -1) {
-        tasks.splice(taskToDeleteIndex, 1)
-      }
-    
+    if (taskToDeleteIndex !== -1) {
+      tasks.splice(taskToDeleteIndex, 1)
+    }
+
 
     localStorage.setItem('tasks', JSON.stringify(tasks));
   }
@@ -212,7 +212,7 @@ class Store {
 // Event: display tasks - после загрузки страницы, показываем список задач из localStorage
 document.addEventListener('DOMContentLoaded', UI.displayTasks);
 
-document.querySelector('#showTableBtn').addEventListener('click', ()=>{
+document.querySelector('#showTableBtn').addEventListener('click', () => {
   UI.showAndHideElement('.taskTable');
 })
 
@@ -260,7 +260,7 @@ document.querySelector('tbody').addEventListener('click', (e) => {
     e.preventDefault();
     UI.removeTask(e.target);
     Store.removeTask(e.target.parentElement.parentElement.id);
-    UI.showAlert('Task removed', 'success')
+
   } else if (isTextField) { // edit Task - редактируем задачу в перечне и в localStorage
     e.target.addEventListener('change', () => {
       Store.editTask('task', e.target.value, e.target.parentElement.parentElement.id);

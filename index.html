@@ -14,13 +14,17 @@
   <div class="container mt-4 ">
 
     <h1 class="display-4 text-center">To<span class="text-info">Do</span>L<span class="text-info">i</span>s<span
-        class="text-info">t</span></h1>
+        class="text-info">t</span><small><sub>by Ivan Agapitov</sub></small></h1>
 
-    <form id="task-form" class=" my-3 mx-auto border border-primary rounded-sm py-2 px-5 form-inline">
+    <form id="task-form"
+      class=" my-3 mx-auto border border-primary rounded-sm py-2 px-5 form-inline d-flex justify-content-center align-items-center">
       <h3 class="text-center align-middle mx-auto w-100">Add new task</h3>
 
-      <input type="text" id="task-text" class="form-control border form-group px-1 w-100 mb-2"
-        placeholder="Enter new task">
+      <div class="d-flex justify-content-center align-items-center w-100">
+        <label class="mt-2 mr-1 ml-5"> Task: </label>
+        <input type="text" id="task-text" class="form-control border form-group px-1  mb-2 w-75"
+          placeholder="Enter new task">
+      </div>
 
       <div class="d-flex justify-content-center align-items-center">
         <label for="date" class="mt-2 mr-1 ml-5"> Choose a startdate: </label>
@@ -36,7 +40,7 @@
     </form>
 
 
-    <div class="d-flex justify-content-center align-middle m-2">
+    <div class="buttons d-flex justify-content-center align-middle m-2">
       <button class="btn btn-primary m-2" id="showTableBtn">Show/Hide Task Table</button>
       <button class="btn btn-primary m-2" id="showChartBtn">Show/Hide Task Chart</button>
     </div>
