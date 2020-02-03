@@ -13,20 +13,27 @@ class Task {
 class UI {
 
 
-
   static showAndHideElement(selector) {
-
     document.querySelector(selector).classList.toggle('d-none');
   }
 
   // показываем задачи из localStorage
   static displayTasks() {
+    const list = document.querySelector('tbody');
+    list.innerHTML = "";
+    const chart = document.querySelector('.chartData');
+    chart.innerHTML = "";
+    
     const tasks = Store.getTasks();
 
     UI.sortTasks(tasks);
-    tasks.forEach((task) => UI.addTasksToList(task))
+    tasks.forEach((task) => {
+      UI.addTasksToList(task);
+      UI.drawTaskOnChart(task)
+    })
 
   }
+
   // добавляем задачу в список задач 
   static addTasksToList(task) {
     const taskList = document.querySelector('tbody');
@@ -76,7 +83,29 @@ class UI {
     }
 
     taskList.appendChild(row);
+  }
 
+  // TODO : динамическое создание дат
+  // TODO: вычисление положения блоков от "первого дня"
+
+  // отрисовываем таск на графике
+  static drawTaskOnChart(task) {
+    const chartField = document.querySelector('.chartData');
+
+    const chartRow = document.createElement('div');
+    const dayWidth = document.querySelector('.day').getBoundingClientRect().right - document.querySelector('.day').getBoundingClientRect().left;
+
+    const left = ((new Date(task.startDate).getTime() - new Date('2020-02-01').getTime()) / (1000 * 3600 * 24)) * dayWidth;
+
+    const taskDuration = ((new Date(task.dueDate).getTime() - new Date(task.startDate).getTime()) / (1000 * 3600 * 24)) * dayWidth;
+
+    chartRow.innerHTML = `
+    <div class="taskName border border-primary">${task.task}</div>
+    <div class="taskDates ">
+      <div class="timeBlock bg-primary" style="left: ${left}px; width: ${taskDuration}px"></div>
+    </div>`
+    chartRow.classList.add('d-flex', 'mt-1', 'taskRow', 'border');
+    chartField.appendChild(chartRow);
   }
 
 
@@ -212,8 +241,14 @@ class Store {
 // Event: display tasks - после загрузки страницы, показываем список задач из localStorage
 document.addEventListener('DOMContentLoaded', UI.displayTasks);
 
+
+// event: show/hide table or chart
 document.querySelector('#showTableBtn').addEventListener('click', () => {
-  UI.showAndHideElement('.taskTable');
+  UI.showAndHideElement('tbody');
+})
+document.querySelector('#showChartBtn').addEventListener('click', () => {
+  UI.showAndHideElement('.chartData');
+
 })
 
 // Event: add Task - добавляем задачу из формы в список
@@ -281,8 +316,8 @@ document.querySelector('tbody').addEventListener('click', (e) => {
 
 // event: sort Task
 document.querySelector('.select-sort').addEventListener('change', () => {
-  const list = document.querySelector('tbody').querySelectorAll('tr');
-  list.forEach(item => item.remove())
+
+
   UI.displayTasks();
 
 });

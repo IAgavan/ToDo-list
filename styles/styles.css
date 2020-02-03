@@ -3,7 +3,6 @@ small{
   font-size: 1rem;
 }
 
-
 #task-form{
   background-color: rgb(174, 225, 238);
 }
@@ -43,3 +42,29 @@ table input{
   border: none;
   background-color: transparent;
 }
+
+/* chart */
+
+.taskChart{
+  font-size: .75rem;
+}
+.taskName{
+  width: 490px;
+  min-width: 150px;
+  
+}
+.day{
+  width: 20px;
+  text-align: center;
+}
+
+
+.taskDates{
+  min-height: 100%;
+  display: block;
+  position: relative;
+}
+.timeBlock{
+  position: absolute;
+  height: 100%;
+ }
