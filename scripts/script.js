@@ -71,25 +71,6 @@ class UI {
 
   }
 
-  // изменяем задачу в списке
-  // static editTask(element) {
-  //   {
-  //     const listItem = element.parentElement;
-  //     const text = listItem.querySelector('.text');
-  //     const editInput = listItem.querySelector('.textField');
-  //     const isEditing = text.classList.contains('d-none');
-
-  //     if (isEditing) {
-  //       text.innerText = editInput.value;
-  //       element.innerText = 'Edit';
-  //     } else {
-  //       editInput.value = text.innerText;
-  //       element.innerText = 'Save'
-  //     }
-  //     text.classList.toggle('d-none');
-  //     editInput.classList.toggle('d-none');
-  //   }
-  // }
 
   // изменяем статус задачи
   static statusTask(element) {
@@ -175,13 +156,18 @@ class Store {
     if (localStorage.getItem('tasks') === null) {
       tasks = [];
     } else {
-      tasks = JSON.parse(localStorage.getItem('tasks'));
+      try {
+        tasks = JSON.parse(localStorage.getItem('tasks'));
+      } catch (e) {
+        console.log('!!!Невозможно прочитать файл. ' , e)
+        tasks = [];
+      }
     }
     return tasks;
   }
 
   // добавляем задачу в массив 
-  static addTask(task) {
+  static setTask(task) {
     const tasks = Store.getTasks();
     tasks.push(task)
 
@@ -242,7 +228,7 @@ document.querySelector('#task-form').addEventListener('submit', (evt) => {
 
     // add task - добавляем задачу в список и в localStorage
     UI.addTasksToList(taskItem);
-    Store.addTask(taskItem);
+    Store.setTask(taskItem);
 
     //show successMessage - оповещение при успехе
     UI.showAlert('Task added', 'success');
