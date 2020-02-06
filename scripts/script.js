@@ -68,8 +68,68 @@ class UI {
     <td class="text-center align-middle"><a href="" class="btn btn-primary btn-sm delete">X</a></td>
     `;
 
-    //проверяем статус задачи
+    // навешиваем слушатели на соответствующие элементы
+    const deleteButton = row.querySelector('.delete');
+    const textField = row.querySelector('.textField');
+    const dueDate = row.querySelector('.dueDate');
+    const startDate = row.querySelector('.startDate');
     const statusSelector = row.querySelector('.custom-select');
+
+
+    deleteButton.addEventListener('click', (e) => {
+      e.preventDefault();
+      UI.removeTask(e.target);
+      Store.removeTask(e.target.parentElement.parentElement.id);
+      UI.drawChart();
+    });
+
+    textField.addEventListener('change', (e) => {
+      Store.editTask('task', e.target.value, e.target.parentElement.parentElement.id);
+      UI.drawChart();
+    });
+
+    startDate.addEventListener('change', (e) => {
+      if (startDate.value > dueDate.value) {
+        startDate.value = dueDate.value;
+        UI.showAlert('Startdate should be erlier than enddate', 'danger')
+      } else {
+        Store.editTask('startDate', startDate.value, startDate.parentElement.parentElement.id);
+        UI.drawChart();
+      }
+    })
+
+    dueDate.addEventListener('change', (e) => {
+      if (startDate.value > dueDate.value) {
+        dueDate.value = startDate.value;
+        UI.showAlert('Duedate should be later than startdate', 'danger')
+      } else {
+        Store.editTask('dueDate', e.target.value, e.target.parentElement.parentElement.id);
+        UI.drawChart();
+      }
+    });
+
+    statusSelector.addEventListener('change', (e) => {
+      switch (statusSelector.value) {
+        case "1":
+          row.classList.remove('table-warning');
+          row.classList.remove('table-success');
+          break;
+        case "2":
+          row.classList.remove('table-success');
+          row.classList.add('table-warning');
+          break;
+        case "3":
+          row.classList.remove('table-warning');
+          row.classList.add('table-success');
+          break;
+      }
+      Store.editTask("status", e.target.value, e.target.parentElement.parentElement.id);
+    })
+
+
+
+
+    //проверяем статус задачи
     statusSelector.value = task.status;
     switch (statusSelector.value) {
       case "2":
@@ -79,10 +139,8 @@ class UI {
         row.classList.add('table-success');
         break;
     }
-
     taskList.appendChild(row);
   }
-
 
 
 
@@ -135,31 +193,7 @@ class UI {
       chartField.appendChild(chartRow);
     }
   }
-  
 
-  // изменяем статус задачи
-  static statusTask(element) {
-    const row = element.parentElement.parentElement;
-
-    element.addEventListener('change', () => {
-      switch (element.value) {
-        case "1":
-          row.classList.remove('table-warning');
-          row.classList.remove('table-success');
-          break;
-        case "2":
-          row.classList.remove('table-success');
-          row.classList.add('table-warning');
-          break;
-        case "3":
-          row.classList.remove('table-warning');
-          row.classList.add('table-success');
-          break;
-      }
-    })
-
-
-  }
 
   // удаляем задачу
   static removeTask(element) {
@@ -194,16 +228,14 @@ class UI {
   // показываем оповещение
   static showAlert(message, className) {
     const div = document.createElement('div');
-    div.className = `alert alert-${className}`
+    div.className = `alert alert-${className} w-25`
     div.appendChild(document.createTextNode(message));
-
     const container = document.querySelector('.container');
-    const buttons = document.querySelector('.buttons');
-    container.insertBefore(div, buttons);
+    container.parentElement.appendChild(div);
 
     setTimeout(() => {
       document.querySelector('.alert').remove()
-    }, 2500);
+    }, 3000);
   }
   // очищаем поля ввода 
   static clearFields() {
@@ -212,6 +244,7 @@ class UI {
     document.querySelector('#dueDate').value = '';
   }
 }
+
 
 // Storage Class - работа с localStorage
 class Store {
@@ -289,8 +322,10 @@ document.querySelector('#task-form').addEventListener('submit', (evt) => {
   const dueDate = document.querySelector('#dueDate').value;
 
   // Validation - проверка поля на заполненность
-  if (text === '') {
-    UI.showAlert('Please, fill the "Task" field', 'danger');
+  if (text === '' || startDate === '' || dueDate === '') {
+    UI.showAlert('Please, fill all fields', 'danger');
+  } else if (startDate > dueDate) {
+    UI.showAlert('Duedate should be later than startdate', 'danger')
   } else {
 
     //Create new task - создаем новую задачу
@@ -310,46 +345,49 @@ document.querySelector('#task-form').addEventListener('submit', (evt) => {
   }
 })
 
-
-// Events: remove/edit tasks
-document.querySelector('tbody').addEventListener('click', (e) => {
-
-  const isDeleteButton = e.target.classList.contains('delete');
-  const isTextField = e.target.classList.contains('textField');
-  const isDueDate = e.target.classList.contains('dueDate');
-  const isStartDate = e.target.classList.contains('startDate');
-  const isStatus = e.target.classList.contains('custom-select');
-
-
-  if (isDeleteButton) { // remove Task - удаляем задачу из перечня и из localStorage
-    e.preventDefault();
-    UI.removeTask(e.target);
-    Store.removeTask(e.target.parentElement.parentElement.id);
-    UI.drawChart();
-
-  } else if (isTextField) { // edit Task - редактируем задачу в перечне и в localStorage
-    e.target.addEventListener('change', () => {
-      Store.editTask('task', e.target.value, e.target.parentElement.parentElement.id);
-      UI.drawChart();
-    })
-  } else if (isStartDate) {
-    e.target.addEventListener('change', () => {
-      Store.editTask('startDate', e.target.value, e.target.parentElement.parentElement.id);
-      UI.drawChart();
-    })
-  } else if (isDueDate) {
-    e.target.addEventListener('change', () => {
-      Store.editTask('dueDate', e.target.value, e.target.parentElement.parentElement.id);
-      UI.drawChart();
-    })
-  } else if (isStatus) {
-    UI.statusTask(e.target);
-    Store.editTask("status", e.target.value, e.target.parentElement.parentElement.id);
-  }
-})
-
 // event: sort Task
 document.querySelector('.select-sort').addEventListener('change', () => {
   UI.displayTasks();
-
 });
+
+// Events: remove/edit tasks
+// document.querySelector('tbody').addEventListener('click', (e) => {
+
+//   const isDeleteButton = e.target.classList.contains('delete');
+//   const isTextField = e.target.classList.contains('textField');
+//   const isDueDate = e.target.classList.contains('dueDate');
+//   const isStartDate = e.target.classList.contains('startDate');
+//   const isStatus = e.target.classList.contains('custom-select');
+
+
+//   if (isDeleteButton) { // remove Task - удаляем задачу из перечня и из localStorage
+//     e.preventDefault();
+//     UI.removeTask(e.target);
+//     Store.removeTask(e.target.parentElement.parentElement.id);
+//     UI.drawChart();
+
+//   } else if (isTextField) { // edit Task - редактируем задачу в перечне и в localStorage
+//     e.target.addEventListener('change', () => {
+//       Store.editTask('task', e.target.value, e.target.parentElement.parentElement.id);
+//       UI.drawChart();
+//     })
+//   } else if (isStartDate) {
+//     e.target.addEventListener('change', (e) => {
+//       if (e.target.value < e.target.parentElement.nextSibling.nextSibling.firstChild.value) {
+//         Store.editTask('startDate', e.target.value, e.target.parentElement.parentElement.id);
+//         UI.drawChart();
+//       } else {
+//         UI.showAlert('Duedate should be later than startdate', 'danger')
+
+//       }
+//     })
+//   } else if (isDueDate) {
+//     e.target.addEventListener('change', () => {
+//       Store.editTask('dueDate', e.target.value, e.target.parentElement.parentElement.id);
+//       UI.drawChart();
+//     })
+//   } else if (isStatus) {
+//     UI.statusTask(e.target);
+//     Store.editTask("status", e.target.value, e.target.parentElement.parentElement.id);
+//   }
+// })

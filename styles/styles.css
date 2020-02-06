@@ -6,6 +6,21 @@ small{
 #task-form{
   background-color: rgb(174, 225, 238);
 }
+
+.alert{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  min-height: 10rem;
+  left:50vw;
+  top:50vh;
+  transform: translateX(-50%) translateY(-50%);
+  z-index: 3000;
+}
+
+
+
 .table th, .table td{
   padding: 0.5rem 0.25rem;
   border-top: none !important;
@@ -42,6 +57,12 @@ table input{
   border: none;
   background-color: transparent;
 }
+
+::-webkit-inner-spin-button { display: none; }
+::-webkit-clear-button{display:none;}
+
+
+
 
 /* chart */
 
