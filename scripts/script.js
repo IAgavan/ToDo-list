@@ -5,10 +5,57 @@ class Task {
     this.task = task;
     this.startDate = startDate;
     this.dueDate = dueDate;
-    this.status = "1";
+    this.status = "1-In progress";
     this.id = id;
   }
 }
+
+// Storage Class - работа с localStorage
+class Store {
+  //  получаем массив из localStorage
+  static getTasks() {
+    let tasks;
+    if (localStorage.getItem('tasks') === null) {
+      tasks = [];
+    } else {
+      try {
+        tasks = JSON.parse(localStorage.getItem('tasks'));
+      } catch (e) {
+        console.log('!!!Невозможно прочитать файл. ', e)
+        tasks = [];
+      }
+    }
+    return tasks;
+  }
+
+  // добавляем задачу в массив 
+  static setTask(task) {
+    const tasks = Store.getTasks();
+    tasks.push(task)
+
+    localStorage.setItem('tasks', JSON.stringify(tasks))
+  }
+
+  //изменяем задачу в массиве
+  static editTask(key, value, id) {
+    const tasks = Store.getTasks();
+    const task = tasks.find(task => task.id === id);
+    if (task === undefined) return;
+    task[key] = value;
+    localStorage.setItem('tasks', JSON.stringify(tasks));
+  }
+
+  // удаляем задачу из массива 
+  static removeTask(id) {
+    const tasks = Store.getTasks();
+    const taskToDeleteIndex = tasks.findIndex(task => task.id === id);
+    if (taskToDeleteIndex !== -1) {
+      tasks.splice(taskToDeleteIndex, 1)
+    }
+    localStorage.setItem('tasks', JSON.stringify(tasks));
+  }
+}
+
 // UI Class: производит UI действия (добавить, удалить, изменить, показать оповещения и др.)
 class UI {
 
@@ -60,9 +107,9 @@ class UI {
     <td class="text-center align-middle"><input type="date" class="date dueDate" value='${task.dueDate}'></td>
     <td class="text-center align-middle">
       <select class="custom-select custom-select-sm w-75 px-1">
-        <option value="1">In progress</option>
-        <option value="2">Pending</option>
-        <option value="3">Finished</option>
+        <option value="1-In progress">In progress</option>
+        <option value="2-Pending">Pending</option>
+        <option value="3-Finished">Finished</option>
       </select>
     </td>
     <td class="text-center align-middle"><a href="" class="btn btn-primary btn-sm delete">X</a></td>
@@ -110,15 +157,15 @@ class UI {
 
     statusSelector.addEventListener('change', (e) => {
       switch (statusSelector.value) {
-        case "1":
+        case "1-In progress":
           row.classList.remove('table-warning');
           row.classList.remove('table-success');
           break;
-        case "2":
+        case "2-Pending":
           row.classList.remove('table-success');
           row.classList.add('table-warning');
           break;
-        case "3":
+        case "3-Finished":
           row.classList.remove('table-warning');
           row.classList.add('table-success');
           break;
@@ -127,15 +174,13 @@ class UI {
     })
 
 
-
-
     //проверяем статус задачи
     statusSelector.value = task.status;
     switch (statusSelector.value) {
-      case "2":
+      case "2-Pending":
         row.classList.add('table-warning');
         break;
-      case "3":
+      case "3-Finished":
         row.classList.add('table-success');
         break;
     }
@@ -143,9 +188,8 @@ class UI {
   }
 
 
-
   static drawChart() {
-    const daysScale = document.querySelector('.taskChart .days');
+    const daysScale = document.querySelector('.days');
     const chartField = document.querySelector('.chartData');
     daysScale.innerHTML = '';
     chartField.innerHTML = '';
@@ -153,7 +197,13 @@ class UI {
     const tasks = Store.getTasks();
     UI.sortTasks(tasks, 'startDate');
 
+    // let maxDate = tasks.reduce((prev, cur) => cur.dueDate > prev.dueDate ? cur : prev, {dueDate: '1970-01-01'});
+    // let minDate = tasks.reduce((prev, cur) => cur.startDate < prev.startDate ? cur : prev, {startDate: '2970-01-01'});
+    
+
     const chartStartDate = tasks.length ? new Date(tasks[0].startDate) : new Date();
+
+
     const lastDay = new Date(chartStartDate.getFullYear(), chartStartDate.getMonth() + 1, 0).getDate();
     for (let i = -1; i < 30; i++) {
       const dateCell = document.createElement('div');
@@ -182,18 +232,67 @@ class UI {
       const taskDuration = ((new Date(task.dueDate).getTime() - new Date(task.startDate).getTime()) / (1000 * 3600 * 24)) * dayWidth;
 
       chartRow.innerHTML = `
-    <div class="taskName border border-primary">${task.task}</div>
-    <div class="taskDates ">
-      <div class="timeBlock bg-primary" style="left: ${taskStart}px; width: ${taskDuration}px">
-        <div class="left"></div>
-        <div class="right"></div>
-      </div>
-    </div>`
+        <div class="taskName border border-primary">${task.task}</div>
+        <div class="taskDates">
+          <div class="timeBlock bg-primary" style="left: ${taskStart}px; width: ${taskDuration}px">
+            <div class="left"></div>
+            <div class="right"></div>
+          </div>
+        </div>`
       chartRow.classList.add('d-flex', 'mt-1', 'taskRow', 'border');
       chartField.appendChild(chartRow);
+
+      const resizedBox = chartRow.querySelector('.timeBlock');
+      const leftResizer = resizedBox.querySelector('.left');
+      const rightResizer = resizedBox.querySelector('.right');
+
+      resizedBox.addEventListener('mousedown', UI.moveBlock);
+      leftResizer.addEventListener('mousedown', UI.resizeBlock);
+      rightResizer.addEventListener('mousedown', UI.resizeBlock);
     }
   }
 
+  static moveBlock(e) {
+    if (e.target.classList.contains('left') || e.target.classList.contains('right')) {
+      return
+    }
+    e.preventDefault();
+    const resizedBox = e.target;
+    const bar = resizedBox.parentElement.getBoundingClientRect();
+    const box = resizedBox.getBoundingClientRect();
+
+    window.addEventListener('mousemove', mousemove);
+    window.addEventListener('mouseup', mouseup);
+    e.target.parentElement.addEventListener('mouseout', mouseup)
+    let prevX = e.clientX;
+
+    function mousemove(e) {
+      const nextX = prevX - e.clientX;
+
+      resizedBox.style.left = (box.left - bar.left) - nextX + 'px';
+      if (box.left < bar.left) {
+        resizedBox.style.left = 0 + 'px'
+      }
+      if (box.right > bar.right) {
+        resizedBox.style.left = bar.right - bar.left - (box.width) + 'px'
+      }
+      prevX = e.clientX;
+
+
+    }
+
+    function mouseup() {
+      //округляем до 10х 
+      resizedBox.style.left = (Math.floor((box.left - bar.left) / 10)) * 10 + 'px';
+
+      // changeInput();
+      // showBox();
+      window.removeEventListener('mousemove', mousemove);
+      window.removeEventListener('mouseup', mouseup);
+      resizedBox.parentElement.removeEventListener('mouseout', mouseup)
+
+    }
+  }
 
   // удаляем задачу
   static removeTask(element) {
@@ -246,53 +345,6 @@ class UI {
 }
 
 
-// Storage Class - работа с localStorage
-class Store {
-  //  получаем массив из localStorage
-  static getTasks() {
-    let tasks;
-    if (localStorage.getItem('tasks') === null) {
-      tasks = [];
-    } else {
-      try {
-        tasks = JSON.parse(localStorage.getItem('tasks'));
-      } catch (e) {
-        console.log('!!!Невозможно прочитать файл. ', e)
-        tasks = [];
-      }
-    }
-    return tasks;
-  }
-
-  // добавляем задачу в массив 
-  static setTask(task) {
-    const tasks = Store.getTasks();
-    tasks.push(task)
-
-    localStorage.setItem('tasks', JSON.stringify(tasks))
-  }
-
-  //изменяем задачу в массиве
-  static editTask(key, value, id) {
-    const tasks = Store.getTasks();
-    const task = tasks.find(task => task.id === id);
-    if (task === undefined) return;
-    task[key] = value;
-    localStorage.setItem('tasks', JSON.stringify(tasks));
-  }
-
-  // удаляем задачу из массива 
-  static removeTask(id) {
-    const tasks = Store.getTasks();
-    const taskToDeleteIndex = tasks.findIndex(task => task.id === id);
-    if (taskToDeleteIndex !== -1) {
-      tasks.splice(taskToDeleteIndex, 1)
-    }
-
-
-    localStorage.setItem('tasks', JSON.stringify(tasks));
-  }
-}
 
 
 
@@ -305,7 +357,7 @@ document.addEventListener('DOMContentLoaded', UI.displayTasks);
 
 // event: show/hide table or chart
 document.querySelector('#showTableBtn').addEventListener('click', () => {
-  UI.showAndHideElement('tbody');
+  UI.showAndHideElement('table');
 })
 document.querySelector('#showChartBtn').addEventListener('click', () => {
   UI.showAndHideElement('.chartData');
