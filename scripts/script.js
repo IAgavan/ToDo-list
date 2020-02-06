@@ -12,7 +12,6 @@ class Task {
 // UI Class: производит UI действия (добавить, удалить, изменить, показать оповещения и др.)
 class UI {
 
-
   static showAndHideElement(selector) {
     document.querySelector(selector).classList.toggle('d-none');
   }
@@ -23,15 +22,14 @@ class UI {
     list.innerHTML = "";
     const chart = document.querySelector('.chartData');
     chart.innerHTML = "";
-    
-    const tasks = Store.getTasks();
 
+    UI.drawChart();
+
+    const tasks = Store.getTasks();
     UI.sortTasks(tasks);
     tasks.forEach((task) => {
       UI.addTasksToList(task);
-      UI.drawTaskOnChart(task)
     })
-
   }
 
   // добавляем задачу в список задач 
@@ -85,29 +83,59 @@ class UI {
     taskList.appendChild(row);
   }
 
-  // TODO : динамическое создание дат
-  // TODO: вычисление положения блоков от "первого дня"
 
-  // отрисовываем таск на графике
-  static drawTaskOnChart(task) {
+
+
+  static drawChart() {
+    const daysScale = document.querySelector('.taskChart .days');
     const chartField = document.querySelector('.chartData');
+    daysScale.innerHTML = '';
+    chartField.innerHTML = '';
 
-    const chartRow = document.createElement('div');
-    const dayWidth = document.querySelector('.day').getBoundingClientRect().right - document.querySelector('.day').getBoundingClientRect().left;
+    const tasks = Store.getTasks();
+    UI.sortTasks(tasks, 'startDate');
 
-    const left = ((new Date(task.startDate).getTime() - new Date('2020-02-01').getTime()) / (1000 * 3600 * 24)) * dayWidth;
+    const chartStartDate = tasks.length ? new Date(tasks[0].startDate) : new Date();
+    const lastDay = new Date(chartStartDate.getFullYear(), chartStartDate.getMonth() + 1, 0).getDate();
+    for (let i = -1; i < 30; i++) {
+      const dateCell = document.createElement('div');
+      let day = chartStartDate.getDate() + i;
+      if (day > lastDay) {
+        day -= lastDay
+      }
+      if (day < 1) {
+        day = new Date(chartStartDate.getFullYear(), chartStartDate.getMonth(), day).getDate();
+      }
+      dateCell.classList.add("day", 'border', 'border-primary');
+      dateCell.innerHTML = day;
+      daysScale.appendChild(dateCell);
+    }
 
-    const taskDuration = ((new Date(task.dueDate).getTime() - new Date(task.startDate).getTime()) / (1000 * 3600 * 24)) * dayWidth;
+    tasks.forEach(task => drawTaskOnChart(task));
 
-    chartRow.innerHTML = `
+
+    // отрисовываем таск на графике
+    function drawTaskOnChart(task) {
+
+      const chartRow = document.createElement('div');
+      const dayWidth = document.querySelector('.day').getBoundingClientRect().width;
+
+      const taskStart = ((new Date(task.startDate).getTime() - (new Date(chartStartDate).getTime()) + 1000 * 3600 * 24) / (1000 * 3600 * 24)) * dayWidth;
+      const taskDuration = ((new Date(task.dueDate).getTime() - new Date(task.startDate).getTime()) / (1000 * 3600 * 24)) * dayWidth;
+
+      chartRow.innerHTML = `
     <div class="taskName border border-primary">${task.task}</div>
     <div class="taskDates ">
-      <div class="timeBlock bg-primary" style="left: ${left}px; width: ${taskDuration}px"></div>
+      <div class="timeBlock bg-primary" style="left: ${taskStart}px; width: ${taskDuration}px">
+        <div class="left"></div>
+        <div class="right"></div>
+      </div>
     </div>`
-    chartRow.classList.add('d-flex', 'mt-1', 'taskRow', 'border');
-    chartField.appendChild(chartRow);
+      chartRow.classList.add('d-flex', 'mt-1', 'taskRow', 'border');
+      chartField.appendChild(chartRow);
+    }
   }
-
+  
 
   // изменяем статус задачи
   static statusTask(element) {
@@ -144,21 +172,21 @@ class UI {
   }
 
   //сортируем список по ключу
-  static sortTasks(tasks) {
-    const keyValue = document.querySelector('.select-sort');
+  static sortTasks(tasks, key) {
+    if (!key) {
+      const keyValue = document.querySelector('.select-sort');
 
-    let key = '';
-    switch (keyValue.value) {
-      case "1":
-        key = 'status';
-        break;
-      case "2":
-        key = 'dueDate';
-        break;
-      case "3":
-        key = 'startDate';
-        break;
-
+      switch (keyValue.value) {
+        case "1":
+          key = 'status';
+          break;
+        case "2":
+          key = 'dueDate';
+          break;
+        case "3":
+          key = 'startDate';
+          break;
+      }
     }
     tasks.sort((a, b) => a[key] > b[key] ? 1 : -1);
   }
@@ -272,6 +300,8 @@ document.querySelector('#task-form').addEventListener('submit', (evt) => {
     UI.addTasksToList(taskItem);
     Store.setTask(taskItem);
 
+    UI.drawChart();
+
     //show successMessage - оповещение при успехе
     UI.showAlert('Task added', 'success');
 
@@ -295,18 +325,22 @@ document.querySelector('tbody').addEventListener('click', (e) => {
     e.preventDefault();
     UI.removeTask(e.target);
     Store.removeTask(e.target.parentElement.parentElement.id);
+    UI.drawChart();
 
   } else if (isTextField) { // edit Task - редактируем задачу в перечне и в localStorage
     e.target.addEventListener('change', () => {
       Store.editTask('task', e.target.value, e.target.parentElement.parentElement.id);
+      UI.drawChart();
     })
   } else if (isStartDate) {
     e.target.addEventListener('change', () => {
       Store.editTask('startDate', e.target.value, e.target.parentElement.parentElement.id);
+      UI.drawChart();
     })
   } else if (isDueDate) {
     e.target.addEventListener('change', () => {
       Store.editTask('dueDate', e.target.value, e.target.parentElement.parentElement.id);
+      UI.drawChart();
     })
   } else if (isStatus) {
     UI.statusTask(e.target);
@@ -316,8 +350,6 @@ document.querySelector('tbody').addEventListener('click', (e) => {
 
 // event: sort Task
 document.querySelector('.select-sort').addEventListener('change', () => {
-
-
   UI.displayTasks();
 
 });
