@@ -59,12 +59,13 @@ class Store {
 // UI Class: производит UI действия (добавить, удалить, изменить, показать оповещения и др.)
 class UI {
 
-  static showAndHideElement(selector) {
-    document.querySelector(selector).classList.toggle('d-none');
-  }
+  // скрыть элемент
+  // static showAndHideElement(selector) {
+  //   document.querySelector(selector).classList.toggle('d-none');
+  // }
 
   // показываем задачи из localStorage
-  static displayTasks() {
+  static displayTasks(key) {
     const list = document.querySelector('tbody');
     list.innerHTML = "";
     const chart = document.querySelector('.chartData');
@@ -73,7 +74,7 @@ class UI {
     UI.drawChart();
 
     const tasks = Store.getTasks();
-    UI.sortTasks(tasks);
+    UI.sortTasks(tasks, key);
     tasks.forEach((task) => {
       UI.addTasksToList(task);
     })
@@ -199,7 +200,7 @@ class UI {
 
     // let maxDate = tasks.reduce((prev, cur) => cur.dueDate > prev.dueDate ? cur : prev, {dueDate: '1970-01-01'});
     // let minDate = tasks.reduce((prev, cur) => cur.startDate < prev.startDate ? cur : prev, {startDate: '2970-01-01'});
-    
+
 
     const chartStartDate = tasks.length ? new Date(tasks[0].startDate) : new Date();
 
@@ -229,7 +230,7 @@ class UI {
       const dayWidth = document.querySelector('.day').getBoundingClientRect().width;
 
       const taskStart = ((new Date(task.startDate).getTime() - (new Date(chartStartDate).getTime()) + 1000 * 3600 * 24) / (1000 * 3600 * 24)) * dayWidth;
-      const taskDuration = ((new Date(task.dueDate).getTime() - new Date(task.startDate).getTime()) / (1000 * 3600 * 24)) * dayWidth;
+      const taskDuration = ((new Date(task.dueDate).getTime() - new Date(task.startDate).getTime()) / (1000 * 3600 * 24)) * dayWidth + dayWidth;
 
       chartRow.innerHTML = `
         <div class="taskName border border-primary">${task.task}</div>
@@ -306,35 +307,29 @@ class UI {
 
   //сортируем список по ключу
   static sortTasks(tasks, key) {
-    if (!key) {
-      const keyValue = document.querySelector('.select-sort');
-
-      switch (keyValue.value) {
-        case "1":
-          key = 'status';
-          break;
-        case "2":
-          key = 'dueDate';
-          break;
-        case "3":
-          key = 'startDate';
-          break;
-      }
-    }
+    key = key ? key : 'startDate';
     tasks.sort((a, b) => a[key] > b[key] ? 1 : -1);
   }
 
   // показываем оповещение
   static showAlert(message, className) {
     const div = document.createElement('div');
-    div.className = `alert alert-${className} w-25`
+    div.className = `alert alert-${className} w-50`
     div.appendChild(document.createTextNode(message));
     const container = document.querySelector('.container');
     container.parentElement.appendChild(div);
 
+    window.addEventListener('click', () => div.classList.add('d-none'), {
+      once: true
+    })
+
     setTimeout(() => {
-      document.querySelector('.alert').remove()
-    }, 3000);
+      window.removeEventListener('click', () => div.classList.add('d-none'), {
+        once: true
+      })
+      div.remove()
+    }, 5000)
+
   }
   // очищаем поля ввода 
   static clearFields() {
@@ -354,15 +349,6 @@ class UI {
 // Event: display tasks - после загрузки страницы, показываем список задач из localStorage
 document.addEventListener('DOMContentLoaded', UI.displayTasks);
 
-
-// event: show/hide table or chart
-document.querySelector('#showTableBtn').addEventListener('click', () => {
-  UI.showAndHideElement('table');
-})
-document.querySelector('#showChartBtn').addEventListener('click', () => {
-  UI.showAndHideElement('.chartData');
-
-})
 
 // Event: add Task - добавляем задачу из формы в список
 document.querySelector('#task-form').addEventListener('submit', (evt) => {
@@ -397,49 +383,14 @@ document.querySelector('#task-form').addEventListener('submit', (evt) => {
   }
 })
 
-// event: sort Task
-document.querySelector('.select-sort').addEventListener('change', () => {
-  UI.displayTasks();
-});
+// events: sort Tasks
 
-// Events: remove/edit tasks
-// document.querySelector('tbody').addEventListener('click', (e) => {
-
-//   const isDeleteButton = e.target.classList.contains('delete');
-//   const isTextField = e.target.classList.contains('textField');
-//   const isDueDate = e.target.classList.contains('dueDate');
-//   const isStartDate = e.target.classList.contains('startDate');
-//   const isStatus = e.target.classList.contains('custom-select');
-
-
-//   if (isDeleteButton) { // remove Task - удаляем задачу из перечня и из localStorage
-//     e.preventDefault();
-//     UI.removeTask(e.target);
-//     Store.removeTask(e.target.parentElement.parentElement.id);
-//     UI.drawChart();
-
-//   } else if (isTextField) { // edit Task - редактируем задачу в перечне и в localStorage
-//     e.target.addEventListener('change', () => {
-//       Store.editTask('task', e.target.value, e.target.parentElement.parentElement.id);
-//       UI.drawChart();
-//     })
-//   } else if (isStartDate) {
-//     e.target.addEventListener('change', (e) => {
-//       if (e.target.value < e.target.parentElement.nextSibling.nextSibling.firstChild.value) {
-//         Store.editTask('startDate', e.target.value, e.target.parentElement.parentElement.id);
-//         UI.drawChart();
-//       } else {
-//         UI.showAlert('Duedate should be later than startdate', 'danger')
-
-//       }
-//     })
-//   } else if (isDueDate) {
-//     e.target.addEventListener('change', () => {
-//       Store.editTask('dueDate', e.target.value, e.target.parentElement.parentElement.id);
-//       UI.drawChart();
-//     })
-//   } else if (isStatus) {
-//     UI.statusTask(e.target);
-//     Store.editTask("status", e.target.value, e.target.parentElement.parentElement.id);
-//   }
-// })
+document.querySelector('#statusColumn').addEventListener('click', () => {
+  UI.displayTasks('status')
+})
+document.querySelector('#startDateColumn').addEventListener('click', () => {
+  UI.displayTasks('startDate')
+})
+document.querySelector('#dueDateColumn').addEventListener('click', () => {
+  UI.displayTasks('dueDate')
+})
