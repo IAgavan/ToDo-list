@@ -12,7 +12,7 @@ small{
   justify-content: center;
   align-items: center;
   position: fixed;
-  min-height: 10rem;
+  min-height: 5rem;
   left:50vw;
   top:50vh;
   transform: translateX(-50%) translateY(-50%);
@@ -28,6 +28,19 @@ small{
 }
 tr th+th, tr th+td, tr td+td{
   border-left: 1px solid #dee2e6;
+}
+th span{
+  display: none;
+}
+
+#startDateColumn:hover>span{
+  display: inline;
+}
+#dueDateColumn:hover>span{
+  display: inline;
+}
+#statusColumn:hover>span{
+  display: inline;
 }
 
 .table tr+tr{

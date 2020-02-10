@@ -41,30 +41,20 @@
 
 
     <div class="buttons d-flex justify-content-center align-middle m-2">
-      <button class="btn btn-primary m-2" id="showTableBtn">Show/Hide Task Table</button>
-      <button class="btn btn-primary m-2" id="showChartBtn">Show/Hide Task Chart</button>
+      <a href="#taskChart" class="btn btn-primary m-2" id="showChartBtn">Go to Task Chart</a>
     </div>
 
     <div class='table-responsive taskTable'>
-      <div class="bg-primary text-center"><h2>Table</h2></div>
       <table class="table border border-primary rounded-sm">
         <thead class="thead bg-primary">
           <tr>
             <th scope="col" class="text-center align-middle">#</th>
             <th scope="col" class="d-flex justify-content-between task-text">
               <p class="text-center align-middle m-auto">Task</p>
-              <form class="p-2">
-                <label for="select">Sort by: </label>
-                <select name="select" class="px-3 bg-primary border rounded-sm select-sort">
-                  <option value="1">Status</option>
-                  <option value="2">Duedate</option>
-                  <option selected value="3">Startdate</option>
-                </select>
-              </form>
             </th>
-            <th scope="col" class="text-center align-middle date">Startdate</th>
-            <th scope="col" class="text-center align-middle date">Duedate</th>
-            <th scope="col" class="text-center align-middle">Status</th>
+            <th scope="col" class="text-center align-middle date" id='startDateColumn'>Startdate <span>&#x2193</span></th>
+            <th scope="col" class="text-center align-middle date" id='dueDateColumn'>Duedate <span>&#x2193</span></th>
+            <th scope="col" class="text-center align-middle" id='statusColumn'>Status <span>&#x2193</span></th>
             <th scope="col" class="text-center align-middle"></th>
           </tr>
         </thead>
@@ -74,43 +64,13 @@
       </table>
     </div>
 
-    <div class="taskChart my-4 bg-light">
+    <div class="taskChart my-4 bg-light" id='taskChart'>
       <div class="bg-primary text-center"><h2>Chart</h2></div>
       <div class="chartRow chartHeader d-flex justify-content-left mb-1">
         <div class="taskName border border-primary">TASK</div>
         <div class="datesRow  ">
           <div class="days d-flex ">
-            <div class="day border border-primary">1</div>
-            <div class="day border border-primary">2</div>
-            <div class="day border border-primary">3</div>
-            <div class="day border border-primary">4</div>
-            <div class="day border border-primary">5</div>
-            <div class="day border border-primary">6</div>
-            <div class="day border border-primary">7</div>
-            <div class="day border border-primary">8</div>
-            <div class="day border border-primary">9</div>
-            <div class="day border border-primary">10</div>
-            <div class="day border border-primary">11</div>
-            <div class="day border border-primary">12</div>
-            <div class="day border border-primary">13</div>
-            <div class="day border border-primary">14</div>
-            <div class="day border border-primary">15</div>
-            <div class="day border border-primary">16</div>
-            <div class="day border border-primary">17</div>
-            <div class="day border border-primary">18</div>
-            <div class="day border border-primary">19</div>
-            <div class="day border border-primary">20</div>
-            <div class="day border border-primary">21</div>
-            <div class="day border border-primary">22</div>
-            <div class="day border border-primary">23</div>
-            <div class="day border border-primary">24</div>
-            <div class="day border border-primary">25</div>
-            <div class="day border border-primary">26</div>
-            <div class="day border border-primary">27</div>
-            <div class="day border border-primary">28</div>
-            <div class="day border border-primary">29</div>
-            <div class="day border border-primary">30</div>
-            <div class="day border border-primary">31</div>
+           
           </div>
         </div>
       </div>
