@@ -1,115 +1,148 @@
-
-small{
+small {
   font-size: 1rem;
 }
 
-#task-form{
-  background-color: rgb(174, 225, 238);
-}
 
-.alert{
+
+.alert {
   display: flex;
   justify-content: center;
   align-items: center;
   position: fixed;
   min-height: 5rem;
-  left:50vw;
-  top:50vh;
+  left: 50vw;
+  top: 50vh;
   transform: translateX(-50%) translateY(-50%);
   z-index: 3000;
 }
 
 
 
-.table th, .table td{
+.table th,
+.table td {
   padding: 0.5rem 0.25rem;
   border-top: none !important;
   border-bottom: none !important;
 }
-tr th+th, tr th+td, tr td+td{
+
+tr th+th,
+tr th+td,
+tr td+td {
   border-left: 1px solid #dee2e6;
 }
-th span{
+
+th span {
   display: none;
 }
-
-#startDateColumn:hover>span{
-  display: inline;
+td select{
+  background: none !important;
 }
-#dueDateColumn:hover>span{
-  display: inline;
-}
-#statusColumn:hover>span{
+#startDateColumn:hover>span {
   display: inline;
 }
 
-.table tr+tr{
- border-top: 1px solid #dee2e6;;
+#dueDateColumn:hover>span {
+  display: inline;
 }
-input{
+
+#statusColumn:hover>span {
+  display: inline;
+}
+
+.table tr+tr {
+  border-top: 1px solid #dee2e6;
+  ;
+}
+
+input {
   font-size: 1rem !important;
 }
 
 
 
-th:nth-child(2){
+th:nth-child(2) {
   min-width: 400px;
 }
+
 td:nth-child(4),
 td:nth-child(3),
 th:nth-child(3),
-th:nth-child(4){
+th:nth-child(4) {
   max-width: 120px;
 }
 
-table input[type="text"]{
+table input[type="text"] {
   padding: 0 0.5rem;
   width: 100%;
 }
-table input{
+
+table input {
   border: none;
   background-color: transparent;
 }
 
-::-webkit-inner-spin-button { display: none; }
-::-webkit-clear-button{display:none;}
+::-webkit-inner-spin-button {
+  display: none;
+}
+
+::-webkit-clear-button {
+  display: none;
+}
 
 
 
 
 /* chart */
 
-.taskChart{
+.taskChart {
   font-size: .75rem;
 }
-.taskName{
-  width: 490px;
+
+.taskName {
+  width: 500px;
   min-width: 150px;
-  
+
 }
-.day{
-  width: 20px;
+
+.taskRow {
+  min-height: 30px;
+}
+
+.timing-wrapper {
+ 
+  overflow-x: auto;
+}
+
+.timing{
+  min-width: max-content;
+}
+
+.day {
+
+  vertical-align: middle;
+  min-width: 40px;
   text-align: center;
 }
 
 
-.taskDates{
+.taskDates {
   min-height: 100%;
-  display: block;
+  display: flex;
   position: relative;
 }
-.timeBlock{
+
+.timeBlock {
   cursor: move;
   display: flex;
   justify-content: space-between;
   position: absolute;
   height: 100%;
- }
+}
 
- .left,
-.right{
+.left,
+.right {
   cursor: e-resize;
-  
+
   min-width: 5px;
   height: 100%;
   background-color: darkseagreen;

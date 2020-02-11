@@ -68,8 +68,10 @@ class UI {
   static displayTasks(key) {
     const list = document.querySelector('tbody');
     list.innerHTML = "";
-    const chart = document.querySelector('.chartData');
-    chart.innerHTML = "";
+    const chartTasks = document.querySelector('.tasksInChartData');
+    chartTasks.innerHTML = "";
+    const chartTiming = document.querySelector('.timingChartData');
+    chartTiming.innerHTML = "";
 
     UI.drawChart();
 
@@ -104,8 +106,8 @@ class UI {
     row.innerHTML = `
     <th scope="row" class="number text-center align-middle">${number}</th>
     <td class="taskText d-flex align-middle"><input type="text" class="textField task" value ='${task.task}'</td>
-    <td class="text-center align-middle"><input type="date" class="date startDate" value='${task.startDate}'></td>
-    <td class="text-center align-middle"><input type="date" class="date dueDate" value='${task.dueDate}'></td>
+    <td class="text-center align-middle"><input type="date" class="date startDate" value='${task.startDate}' max= '${task.dueDate}'></td>
+    <td class="text-center align-middle"><input type="date" class="date dueDate" value='${task.dueDate}' min = '${task.startDate}'></td>
     <td class="text-center align-middle">
       <select class="custom-select custom-select-sm w-75 px-1">
         <option value="1-In progress">In progress</option>
@@ -141,6 +143,7 @@ class UI {
         startDate.value = dueDate.value;
         UI.showAlert('Startdate should be erlier than enddate', 'danger')
       } else {
+        dueDate.min = startDate.value;
         Store.editTask('startDate', startDate.value, startDate.parentElement.parentElement.id);
         UI.drawChart();
       }
@@ -151,6 +154,7 @@ class UI {
         dueDate.value = startDate.value;
         UI.showAlert('Duedate should be later than startdate', 'danger')
       } else {
+        startDate.max = dueDate.value;
         Store.editTask('dueDate', e.target.value, e.target.parentElement.parentElement.id);
         UI.drawChart();
       }
@@ -191,33 +195,40 @@ class UI {
 
   static drawChart() {
     const daysScale = document.querySelector('.days');
-    const chartField = document.querySelector('.chartData');
+    const chartField = document.querySelector('.timingChartData');
+    const chartTasks = document.querySelector('.tasksInChartData');
     daysScale.innerHTML = '';
     chartField.innerHTML = '';
+    chartTasks.innerHTML = '';
 
     const tasks = Store.getTasks();
     UI.sortTasks(tasks, 'startDate');
 
-    // let maxDate = tasks.reduce((prev, cur) => cur.dueDate > prev.dueDate ? cur : prev, {dueDate: '1970-01-01'});
+
     // let minDate = tasks.reduce((prev, cur) => cur.startDate < prev.startDate ? cur : prev, {startDate: '2970-01-01'});
-
-
     const chartStartDate = tasks.length ? new Date(tasks[0].startDate) : new Date();
+    const maxDate = tasks.reduce((prev, cur) => cur.dueDate > prev.dueDate ? cur : prev, {
+      dueDate: '1970-01-01'
+    });
 
+    const totalDuration = (new Date(maxDate.dueDate) - chartStartDate) / (1000 * 3600 * 24);
 
-    const lastDay = new Date(chartStartDate.getFullYear(), chartStartDate.getMonth() + 1, 0).getDate();
-    for (let i = -1; i < 30; i++) {
+    for (let i = -1; i < Math.max(totalDuration + 2, 14); i++) {
       const dateCell = document.createElement('div');
       let day = chartStartDate.getDate() + i;
-      if (day > lastDay) {
-        day -= lastDay
+      day = new Date(chartStartDate.getFullYear(), chartStartDate.getMonth(), day);
+
+      if (day.getDay() == 0 || day.getDay() == 6) {
+        dateCell.classList.add('table-warning');
       }
-      if (day < 1) {
-        day = new Date(chartStartDate.getFullYear(), chartStartDate.getMonth(), day).getDate();
-      }
-      dateCell.classList.add("day", 'border', 'border-primary');
-      dateCell.innerHTML = day;
+      dateCell.classList.add("day", 'border', 'border-primary', 'py-1');
+
+      dateCell.innerHTML = day.toLocaleDateString('en-Gb', {
+        month: 'short',
+        day: 'numeric'
+      });
       daysScale.appendChild(dateCell);
+
     }
 
     tasks.forEach(task => drawTaskOnChart(task));
@@ -226,24 +237,32 @@ class UI {
     // отрисовываем таск на графике
     function drawTaskOnChart(task) {
 
-      const chartRow = document.createElement('div');
+      const chartRowTaskName = document.createElement('div');
+      const chartRowtaskTiming = document.createElement('div');
       const dayWidth = document.querySelector('.day').getBoundingClientRect().width;
 
       const taskStart = ((new Date(task.startDate).getTime() - (new Date(chartStartDate).getTime()) + 1000 * 3600 * 24) / (1000 * 3600 * 24)) * dayWidth;
       const taskDuration = ((new Date(task.dueDate).getTime() - new Date(task.startDate).getTime()) / (1000 * 3600 * 24)) * dayWidth + dayWidth;
 
-      chartRow.innerHTML = `
-        <div class="taskName border border-primary">${task.task}</div>
-        <div class="taskDates">
-          <div class="timeBlock bg-primary" style="left: ${taskStart}px; width: ${taskDuration}px">
+      chartRowTaskName.innerHTML = `
+        <div class="taskName border border-primary px-1">${task.task}</div>`
+      chartRowtaskTiming.innerHTML = `
+        <div class="taskDates w-100">
+          <div class="timeBlock bg-primary" id="${task.id+'time'}" style="left: ${taskStart}px; width: ${taskDuration}px">
             <div class="left"></div>
             <div class="right"></div>
           </div>
         </div>`
-      chartRow.classList.add('d-flex', 'mt-1', 'taskRow', 'border');
-      chartField.appendChild(chartRow);
 
-      const resizedBox = chartRow.querySelector('.timeBlock');
+      chartRowTaskName.classList.add('d-flex', 'mt-1', 'taskRow');
+      chartRowtaskTiming.classList.add('d-flex', 'mt-1', 'taskRow');
+
+
+
+      chartTasks.appendChild(chartRowTaskName);
+      chartField.appendChild(chartRowtaskTiming);
+
+      const resizedBox = chartRowtaskTiming.querySelector('.timeBlock');
       const leftResizer = resizedBox.querySelector('.left');
       const rightResizer = resizedBox.querySelector('.right');
 
@@ -260,7 +279,7 @@ class UI {
     e.preventDefault();
     const resizedBox = e.target;
     const bar = resizedBox.parentElement.getBoundingClientRect();
-    const box = resizedBox.getBoundingClientRect();
+
 
     window.addEventListener('mousemove', mousemove);
     window.addEventListener('mouseup', mouseup);
@@ -269,7 +288,7 @@ class UI {
 
     function mousemove(e) {
       const nextX = prevX - e.clientX;
-
+      const box = resizedBox.getBoundingClientRect();
       resizedBox.style.left = (box.left - bar.left) - nextX + 'px';
       if (box.left < bar.left) {
         resizedBox.style.left = 0 + 'px'
@@ -283,17 +302,120 @@ class UI {
     }
 
     function mouseup() {
-      //округляем до 10х 
-      resizedBox.style.left = (Math.floor((box.left - bar.left) / 10)) * 10 + 'px';
+      //округляем до 10х       
+      const box = resizedBox.getBoundingClientRect();
+      let left = Math.floor((box.left - bar.left) / 10)
+      if ((left % 10) % 2 != 0) {
+        left += 1;
+      }
+      resizedBox.style.left = left * 10 + 'px';
 
-      // changeInput();
-      // showBox();
+      UI.changeTiming(resizedBox);
+
+
       window.removeEventListener('mousemove', mousemove);
       window.removeEventListener('mouseup', mouseup);
       resizedBox.parentElement.removeEventListener('mouseout', mouseup)
 
     }
   }
+
+  static resizeBlock(e) {
+    e.preventDefault();
+    const element = e.target
+    const resizedBox = element.parentElement;
+    const bar = resizedBox.parentElement.getBoundingClientRect();
+
+    window.addEventListener('mousemove', mousemove);
+    window.addEventListener('mouseup', mouseup);
+    let prevX = e.clientX;
+
+    function mousemove(e) {
+      const nextX = prevX - e.clientX;
+      const box = resizedBox.getBoundingClientRect();
+      if (element.classList.contains('left')) {
+        resizedBox.style.left = (box.left - bar.left) - nextX + 'px';
+        if (box.left < bar.left) {
+          resizedBox.style.left = 0 + 'px'
+        }
+        prevX = e.clientX;
+        resizedBox.style.width = box.width + nextX + 'px';
+      } else {
+        if (box.right > bar.right) {
+          resizedBox.style.left = bar.right - bar.left - (box.width) + 'px'
+        }
+        prevX = e.clientX;
+        resizedBox.style.width = box.width - nextX + 'px';
+      }
+
+    }
+
+    function mouseup() {
+
+      //округляем до 20х 
+      function roundToTwenty(param) {
+        let rounded = Math.floor((parseInt(param)) / 10)
+        if ((rounded % 10) % 2 != 0) {
+          rounded += 1;
+        }
+        return rounded
+      }
+
+
+      resizedBox.style.left = roundToTwenty(resizedBox.style.left) * 10 + 'px';
+      resizedBox.style.width = roundToTwenty(resizedBox.style.width) * 10 + 'px'
+
+      UI.changeTiming(resizedBox);
+
+      window.removeEventListener('mousemove', mousemove);
+      window.removeEventListener('mouseup', mouseup);
+      resizedBox.parentElement.removeEventListener('mouseout', mouseup)
+
+    }
+  }
+
+  static changeTiming(resizedBox) {
+
+    const dayWidth = document.querySelector('.day').getBoundingClientRect().width;
+    const bar = resizedBox.parentElement.getBoundingClientRect();
+
+    const tasks = Store.getTasks();
+    const chartStartDate = tasks.length ? new Date(tasks[0].startDate) : new Date();
+
+
+    const newStartDate = ((resizedBox.getBoundingClientRect().left - bar.left) / dayWidth) * (1000 * 3600 * 24) +
+      (new Date(chartStartDate).getTime()) - 3 * 1000 * 3600 * 24;
+    const newEndDate = (resizedBox.getBoundingClientRect().width / dayWidth) * (1000 * 3600 * 24) + newStartDate - 1000 * 3600 * 24 / 2
+
+
+    function dateForValue(date) {
+      const year = date.getFullYear()
+      let month = date.getMonth() + 1;
+      if (month <= 9) {
+        month = '0' + month;
+      }
+      let day = date.getDate();
+      if (day <= 9) {
+        day = '0' + day;
+      }
+      return `${year}-${month}-${day}`
+    }
+
+    const changeTaskId = resizedBox.id.slice(0, -4)
+    const startDateInput = document.querySelector(`#${changeTaskId}`).querySelector('.startDate');
+    const endDateInput = document.querySelector(`#${changeTaskId}`).querySelector('.dueDate');
+
+    startDateInput.value = dateForValue(new Date(newStartDate));
+    endDateInput.value = dateForValue(new Date(newEndDate));
+
+    Store.editTask('startDate', startDateInput.value, changeTaskId);
+    Store.editTask('dueDate', endDateInput.value, changeTaskId);
+  }
+
+
+
+
+
 
   // удаляем задачу
   static removeTask(element) {
@@ -344,6 +466,15 @@ class UI {
 
 
 // ~~~~~~~~~~~~~~~~~~~~~EVENTS - СОБЫТИЯ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// ограничение дат инпута
+document.querySelector('#startDate').addEventListener('input',(e)=>{
+  const dueDate = document.querySelector('#dueDate')
+  dueDate.min = e.target.value;
+})
+document.querySelector('#dueDate').addEventListener('input',(e)=>{
+  const startDate = document.querySelector('#startDate');
+  startDate.max = e.target.value
+})
 
 
 // Event: display tasks - после загрузки страницы, показываем список задач из localStorage
