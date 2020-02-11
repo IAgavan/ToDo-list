@@ -17,7 +17,7 @@
         class="text-info">i</span>s<span class="text-info">t</span>)<small><sub>by Ivan Agapitov</sub></small></h1>
 
     <form id="task-form"
-      class=" my-3 mx-auto border border-primary rounded-sm py-2 px-5 form-inline d-flex justify-content-center align-items-center">
+      class="bg-light my-3 mx-auto border border-primary rounded-sm py-2 px-5 form-inline d-flex justify-content-center align-items-center">
       <h3 class="text-center align-middle mx-auto w-100">Add new task</h3>
 
       <div class="d-flex justify-content-center align-items-center w-100">
@@ -41,18 +41,19 @@
 
 
     <div class="buttons d-flex justify-content-center align-middle m-2">
-      <a href="#taskChart" class="btn btn-primary m-2" id="showChartBtn">Go to Task Chart</a>
+      <a href="#taskChart" class="btn btn-primary m-2" id="showChartBtn">Go to Chart</a>
     </div>
 
-    <div class='table-responsive taskTable'>
-      <table class="table border border-primary rounded-sm">
+    <div class='table-responsive taskTable '>
+      <table class="table border border-primary rounded-sm bg-light">
         <thead class="thead bg-primary">
           <tr>
             <th scope="col" class="text-center align-middle">#</th>
             <th scope="col" class="d-flex justify-content-between task-text">
               <p class="text-center align-middle m-auto">Task</p>
             </th>
-            <th scope="col" class="text-center align-middle date" id='startDateColumn'>Startdate <span>&#x2193</span></th>
+            <th scope="col" class="text-center align-middle date" id='startDateColumn'>Startdate <span>&#x2193</span>
+            </th>
             <th scope="col" class="text-center align-middle date" id='dueDateColumn'>Duedate <span>&#x2193</span></th>
             <th scope="col" class="text-center align-middle" id='statusColumn'>Status <span>&#x2193</span></th>
             <th scope="col" class="text-center align-middle"></th>
@@ -64,20 +65,28 @@
       </table>
     </div>
 
-    <div class="taskChart my-4 bg-light" id='taskChart'>
-      <div class="bg-primary text-center"><h2>Chart</h2></div>
-      <div class="chartRow chartHeader d-flex justify-content-left mb-1">
-        <div class="taskName border border-primary">TASK</div>
-        <div class="datesRow  ">
-          <div class="days d-flex ">
-           
+    <div class="taskChart my-4 bg-light d-flex" id='taskChart'>
+      <div class="tasksInChart">
+        <div class="tasksInChartHeader taskRow p-1 border border-primary text-center">
+          TASKS
+        </div>
+        <div class="tasksInChartData">
+
+        </div>
+      </div>
+      <div class="timing-wrapper">
+        <div class="timing w-100">
+          <div class="datesRow w-100">
+            <div class="days d-flex taskRow">
+  
+            </div>
+          </div>
+          <div class="timingChartData">
+  
           </div>
         </div>
       </div>
 
-      <div class="chartData">
-        
-      </div>
 
     </div>
 
