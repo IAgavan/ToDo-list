@@ -174,7 +174,6 @@ class UI {
       Store.editTask("status", e.target.value, e.target.parentElement.parentElement.id);
     })
 
-
     //проверяем статус задачи
     statusSelector.value = task.status;
     switch (statusSelector.value) {
@@ -200,16 +199,13 @@ class UI {
     const tasks = Store.getTasks();
     UI.sortTasks(tasks, 'startDate');
 
-
-    // let minDate = tasks.reduce((prev, cur) => cur.startDate < prev.startDate ? cur : prev, {startDate: '2970-01-01'});
     const chartStartDate = tasks.length ? new Date(tasks[0].startDate) : new Date();
     this.minDate = chartStartDate;
-
     const maxDate = tasks.reduce((prev, cur) => cur.dueDate > prev.dueDate ? cur : prev, {
       dueDate: '1970-01-01'
     });
-
-    const totalDuration = (new Date(maxDate.dueDate) - chartStartDate) / (1000 * 3600 * 24);
+    const oneDayInMs = 1000 * 3600 * 24;
+    const totalDuration = (new Date(maxDate.dueDate) - chartStartDate) / oneDayInMs;
 
     for (let i = -1; i < Math.max(totalDuration + 2, 14); i++) {
       const dateCell = document.createElement('div');
@@ -226,21 +222,18 @@ class UI {
         day: 'numeric'
       });
       daysScale.appendChild(dateCell);
-
     }
-
     tasks.forEach(task => drawTaskOnChart(task));
 
 
     // отрисовываем таск на графике
     function drawTaskOnChart(task) {
-
       const chartRowTaskName = document.createElement('div');
       const chartRowtaskTiming = document.createElement('div');
       const dayWidth = document.querySelector('.day').getBoundingClientRect().width;
 
-      const taskStart = ((new Date(task.startDate).getTime() - (new Date(chartStartDate).getTime()) + 1000 * 3600 * 24) / (1000 * 3600 * 24)) * dayWidth;
-      const taskDuration = ((new Date(task.dueDate).getTime() - new Date(task.startDate).getTime()) / (1000 * 3600 * 24)) * dayWidth + dayWidth;
+      const taskStart = ((new Date(task.startDate).getTime() - UI.minDate.getTime()) + oneDayInMs) / oneDayInMs * dayWidth;
+      const taskDuration = ((new Date(task.dueDate).getTime() - new Date(task.startDate).getTime()) / oneDayInMs) * dayWidth + dayWidth;
 
       chartRowTaskName.innerHTML = `
         <div class="taskName border border-primary px-1">${task.task}</div>`
@@ -254,8 +247,6 @@ class UI {
 
       chartRowTaskName.classList.add('d-flex', 'mt-1', 'taskRow');
       chartRowtaskTiming.classList.add('d-flex', 'mt-1', 'taskRow');
-
-
 
       chartTasks.appendChild(chartRowTaskName);
       chartField.appendChild(chartRowtaskTiming);
@@ -278,7 +269,6 @@ class UI {
     const resizedBox = e.target;
     const bar = resizedBox.parentElement.getBoundingClientRect();
 
-
     window.addEventListener('mousemove', mousemove);
     window.addEventListener('mouseup', mouseup);
     e.target.parentElement.addEventListener('mouseout', mouseup)
@@ -295,12 +285,10 @@ class UI {
         resizedBox.style.left = bar.right - bar.left - (box.width) + 'px'
       }
       prevX = e.clientX;
-
-
     }
 
     function mouseup() {
-      //округляем до 10х       
+      //округляем до 20х       
       const box = resizedBox.getBoundingClientRect();
       let left = Math.floor((box.left - bar.left) / 10)
       if ((left % 10) % 2 != 0) {
@@ -310,11 +298,9 @@ class UI {
 
       UI.changeTiming(resizedBox);
 
-
       window.removeEventListener('mousemove', mousemove);
       window.removeEventListener('mouseup', mouseup);
       resizedBox.parentElement.removeEventListener('mouseout', mouseup)
-
     }
   }
 
@@ -345,11 +331,9 @@ class UI {
         prevX = e.clientX;
         resizedBox.style.width = box.width - nextX + 'px';
       }
-
     }
 
     function mouseup() {
-
       //округляем до 20х 
       function roundToTwenty(param) {
         let rounded = Math.floor((parseInt(param)) / 10)
@@ -370,13 +354,15 @@ class UI {
 
     }
   }
-
+// изменяем время задачи от  и размера положения блока 
   static changeTiming(resizedBox) {
     const dayWidth = document.querySelector('.day').getBoundingClientRect().width;
     const bar = resizedBox.parentElement.getBoundingClientRect();
+    const oneDayInMs = 1000 * 3600 * 24;
+    const box = resizedBox.getBoundingClientRect()
 
-    const newStartDate = (((resizedBox.getBoundingClientRect().left - bar.left) / dayWidth) * (1000 * 3600 * 24)) - 1000 * 3600 * 24 + UI.minDate.getTime()
-    const newEndDate = (((resizedBox.getBoundingClientRect().right - bar.left) / dayWidth) * (1000 * 3600 * 24)) - 1.5 * 1000 * 3600 * 24 + UI.minDate.getTime()
+    const newStartDate = (((box.left - bar.left) / dayWidth) * oneDayInMs) - oneDayInMs + UI.minDate.getTime()
+    const newEndDate = ((box.right - bar.left) / dayWidth) * oneDayInMs - 1.5 * oneDayInMs + UI.minDate.getTime()
 
     function dateForValue(date) {
       const year = date.getFullYear()
@@ -401,9 +387,6 @@ class UI {
     Store.editTask('startDate', startDateInput.value, changeTaskId);
     Store.editTask('dueDate', endDateInput.value, changeTaskId);
   }
-
-
-
 
 
 
