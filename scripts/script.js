@@ -59,10 +59,6 @@ class Store {
 // UI Class: производит UI действия (добавить, удалить, изменить, показать оповещения и др.)
 class UI {
 
-  // скрыть элемент
-  // static showAndHideElement(selector) {
-  //   document.querySelector(selector).classList.toggle('d-none');
-  // }
 
   // показываем задачи из localStorage
   static displayTasks(key) {
@@ -207,6 +203,8 @@ class UI {
 
     // let minDate = tasks.reduce((prev, cur) => cur.startDate < prev.startDate ? cur : prev, {startDate: '2970-01-01'});
     const chartStartDate = tasks.length ? new Date(tasks[0].startDate) : new Date();
+    this.minDate = chartStartDate;
+
     const maxDate = tasks.reduce((prev, cur) => cur.dueDate > prev.dueDate ? cur : prev, {
       dueDate: '1970-01-01'
     });
@@ -361,7 +359,6 @@ class UI {
         return rounded
       }
 
-
       resizedBox.style.left = roundToTwenty(resizedBox.style.left) * 10 + 'px';
       resizedBox.style.width = roundToTwenty(resizedBox.style.width) * 10 + 'px'
 
@@ -375,18 +372,11 @@ class UI {
   }
 
   static changeTiming(resizedBox) {
-
     const dayWidth = document.querySelector('.day').getBoundingClientRect().width;
     const bar = resizedBox.parentElement.getBoundingClientRect();
 
-    const tasks = Store.getTasks();
-    const chartStartDate = tasks.length ? new Date(tasks[0].startDate) : new Date();
-
-
-    const newStartDate = ((resizedBox.getBoundingClientRect().left - bar.left) / dayWidth) * (1000 * 3600 * 24) +
-      (new Date(chartStartDate).getTime()) - 3 * 1000 * 3600 * 24;
-    const newEndDate = (resizedBox.getBoundingClientRect().width / dayWidth) * (1000 * 3600 * 24) + newStartDate - 1000 * 3600 * 24 / 2
-
+    const newStartDate = (((resizedBox.getBoundingClientRect().left - bar.left) / dayWidth) * (1000 * 3600 * 24)) - 1000 * 3600 * 24 + UI.minDate.getTime()
+    const newEndDate = (((resizedBox.getBoundingClientRect().right - bar.left) / dayWidth) * (1000 * 3600 * 24)) - 1.5 * 1000 * 3600 * 24 + UI.minDate.getTime()
 
     function dateForValue(date) {
       const year = date.getFullYear()
@@ -457,7 +447,9 @@ class UI {
   static clearFields() {
     document.querySelector('#task-text').value = '';
     document.querySelector('#startDate').value = '';
+    document.querySelector('#startDate').max = '';
     document.querySelector('#dueDate').value = '';
+    document.querySelector('#dueDate').min = '';
   }
 }
 
@@ -467,11 +459,11 @@ class UI {
 
 // ~~~~~~~~~~~~~~~~~~~~~EVENTS - СОБЫТИЯ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // ограничение дат инпута
-document.querySelector('#startDate').addEventListener('input',(e)=>{
+document.querySelector('#startDate').addEventListener('input', (e) => {
   const dueDate = document.querySelector('#dueDate')
   dueDate.min = e.target.value;
 })
-document.querySelector('#dueDate').addEventListener('input',(e)=>{
+document.querySelector('#dueDate').addEventListener('input', (e) => {
   const startDate = document.querySelector('#startDate');
   startDate.max = e.target.value
 })
