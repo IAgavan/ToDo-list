@@ -96,13 +96,17 @@ table input {
 
 .taskChart {
   font-size: .75rem;
+  position: relative;
 }
 
 .taskName {
   /* overflow:hidden; */
   width: 100%;
-  min-width: 150px;
+  
 
+}
+.tasksInChartHeader{
+  height: 60px;
 }
 
 .taskRow {
@@ -114,15 +118,31 @@ table input {
  
   overflow-x: auto;
 }
+.scaleButtons {
+  position: absolute;
+  top: 5px;
+  right: 20px;
+  display: flex;
+  z-index: 1;
+  opacity: 0.5;
+}
+.scaleButtons:hover{
+  opacity: 1;
+}
+.scaleButtons>.btn{
+  min-width: 30px;
+}
 
 .timing{
   min-width: max-content;
 }
 
+.textInBox,
+.month,
 .day {
 
   vertical-align: middle;
-  /* min-width: 40px; */
+ 
   text-align: center;
 }
 

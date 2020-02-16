@@ -136,7 +136,7 @@
 
      textField.addEventListener('change', (e) => {
        Store.editTask('task', e.target.value, e.target.parentElement.parentElement.id);
-       UI.drawChart();
+       UI.drawChart(currentScale);
      });
 
      startDate.addEventListener('change', (e) => {
@@ -193,14 +193,17 @@
    }
 
 
-   static drawChart() {
+   static drawChart(scale) {
      const minDayWidth = 5; //px
      const daysScale = document.querySelector('.days');
+     const monthScale = document.querySelector('.monthes');
      const chartField = document.querySelector('.timingChartData');
      const chartTasks = document.querySelector('.tasksInChartData');
      daysScale.innerHTML = '';
+     monthScale.innerHTML = '';
      chartField.innerHTML = '';
      chartTasks.innerHTML = '';
+
 
      const tasks = Store.getTasks();
      UI.sortTasks(tasks, 'startDate');
@@ -213,36 +216,78 @@
      const oneDayInMs = 1000 * 3600 * 24;
 
      const totalDuration = (new Date(maxDate.dueDate) - chartStartDate) / oneDayInMs; // в днях
-     while (totalDuration * minDayWidth * currentScale + 3 * minDayWidth * currentScale > daysScale.getBoundingClientRect().width) {
-       currentScale--;
-       if (currentScale == 1) {
-         break
+
+
+     if (!scale) {
+       while (totalDuration * minDayWidth * currentScale + 3 * minDayWidth * currentScale > daysScale.getBoundingClientRect().width) {
+         currentScale--;
+         if (currentScale == 1) {
+           break
+         }
        }
+       scale = currentScale;
+     }
+
+     const maxDaysOnScreen = Math.floor(daysScale.getBoundingClientRect().width / (scale * minDayWidth));
+     const daysOnScreen = Math.max(totalDuration + 2, totalDuration + (maxDaysOnScreen - totalDuration) - 1);
+
+     //  месяцы
+     const firstDate = new Date(chartStartDate.getFullYear(), chartStartDate.getMonth(), chartStartDate.getDate() - 1);
+     const lastDate = new Date(chartStartDate.getFullYear(), chartStartDate.getMonth(), chartStartDate.getDate() + daysOnScreen - 1);
+
+     for (let i = firstDate.getMonth(); i <= lastDate.getMonth(); i++) {
+       const monthCell = document.createElement('div');
+       let month = new Date(chartStartDate.getFullYear(), i);
+
+       monthCell.classList.add('month', 'border', 'border-primary', 'py-1');
+
+       let daysInMonth = new Date(month.getFullYear(), month.getMonth() + 1, 0).getDate();
+       if (i == firstDate.getMonth()) {
+         daysInMonth = daysInMonth - firstDate.getDate() + 1;
+       }
+       if (i == lastDate.getMonth()) {
+         daysInMonth = lastDate.getDate();
+       }
+
+       monthCell.style.width = daysInMonth * scale * minDayWidth + 'px';
+       if (daysInMonth * scale * minDayWidth >= 40) {
+         monthCell.innerHTML = month.toLocaleDateString('en-Gb', {
+           year: '2-digit',
+           month: 'short'
+         });
+       }
+       if (daysInMonth * scale * minDayWidth >= 90) {
+         monthCell.innerHTML = month.toLocaleDateString('en-Gb', {
+           year: 'numeric',
+           month: 'long'
+         });
+       }
+       monthScale.appendChild(monthCell);
      }
 
 
-     const maxDaysOnScreen = Math.floor(daysScale.getBoundingClientRect().width / (currentScale * minDayWidth));
-     const daysOnScreen = Math.max(totalDuration + 2, totalDuration + (maxDaysOnScreen - totalDuration) - 1);
-
-
-
+     // дни
      for (let i = -1; i < daysOnScreen; i++) {
        const dateCell = document.createElement('div');
-       let day = chartStartDate.getDate() + i;
-       day = new Date(chartStartDate.getFullYear(), chartStartDate.getMonth(), day);
+       let day = new Date(chartStartDate.getFullYear(), chartStartDate.getMonth(), chartStartDate.getDate() + i);
 
        if (day.getDay() == 0 || day.getDay() == 6) {
          dateCell.classList.add('table-warning');
        }
        dateCell.classList.add("day", 'border', 'border-primary', 'py-1');
-       dateCell.style.width = currentScale * minDayWidth + 'px';
+       dateCell.style.width = scale * minDayWidth + 'px';
+       if (scale > 3) {
+         dateCell.innerHTML = day.toLocaleDateString('en-Gb', {
+           day: 'numeric'
+         });
+       }
 
-       // dateCell.innerHTML = day.toLocaleDateString('en-Gb', {
-       //   month: 'short',
-       //   day: 'numeric'
-       // });
        daysScale.appendChild(dateCell);
      }
+
+
+
+
      tasks.forEach(task => drawTaskOnChart(task));
 
 
@@ -256,11 +301,12 @@
        const taskDuration = ((new Date(task.dueDate).getTime() - new Date(task.startDate).getTime()) / oneDayInMs) * dayWidth + dayWidth;
 
        chartRowTaskName.innerHTML = `
-        <div class="taskName border border-primary px-1">${task.task}</div>`
+        <div class="taskName border border-primary p-1">${task.task}</div>`
        chartRowtaskTiming.innerHTML = `
         <div class="taskDates w-100">
           <div class="timeBlock bg-primary" id="${task.id+'time'}" style="left: ${taskStart}px; width: ${taskDuration}px">
             <div class="left"></div>
+            <div class="textInBox py-1 text-white">${task.task}</div>
             <div class="right"></div>
           </div>
         </div>`
@@ -278,9 +324,14 @@
        resizedBox.addEventListener('mousedown', UI.moveBlock);
        leftResizer.addEventListener('mousedown', UI.resizeBlock);
        rightResizer.addEventListener('mousedown', UI.resizeBlock);
+
+       const textInBox = resizedBox.querySelector('.textInBox');
+       if (textInBox.getBoundingClientRect().width > resizedBox.getBoundingClientRect().width - 20) {
+         textInBox.innerHTML = '';
+       }
      }
 
-     currentScale = 8;
+
    }
 
    static moveBlock(e) {
@@ -311,11 +362,11 @@
 
      function mouseup() {
        //округляем до полудня     
-       const dayWidth = document.querySelector('.day').getBoundingClientRect().width;
-       const box = resizedBox.getBoundingClientRect();
-       const gap = (box.left - bar.left) % dayWidth;
-       const left = (box.left - bar.left) - (gap > dayWidth / 2 ? (gap - dayWidth / 2) : gap);
-       resizedBox.style.left = left + 'px';
+       //  const dayWidth = document.querySelector('.day').getBoundingClientRect().width;
+       //  const box = resizedBox.getBoundingClientRect();
+       //  const gap = (box.left - bar.left) % dayWidth;
+       //  const left = (box.left - bar.left) - (gap > dayWidth / 2 ? (gap - dayWidth / 2) : gap);
+       //  resizedBox.style.left = left + 'px';
 
        UI.changeTiming(resizedBox);
 
@@ -323,7 +374,7 @@
        window.removeEventListener('mouseup', mouseup);
        resizedBox.parentElement.removeEventListener('mouseout', mouseup)
 
-       UI.drawChart()
+       UI.drawChart(currentScale)
      }
    }
 
@@ -354,21 +405,27 @@
          prevX = e.clientX;
          resizedBox.style.width = box.width - nextX + 'px';
        }
+
+       const textInBox = resizedBox.querySelector('.textInBox');
+       if (textInBox.getBoundingClientRect().width > resizedBox.getBoundingClientRect().width - 20) {
+         textInBox.innerHTML = '';
+       }
      }
 
      function mouseup() {
        //округляем до полудня
 
-       const dayWidth = document.querySelector('.day').getBoundingClientRect().width;
-       const box = resizedBox.getBoundingClientRect();
+       //  const dayWidth = document.querySelector('.day').getBoundingClientRect().width;
+       //  const box = resizedBox.getBoundingClientRect();
 
-       const gap = (box.left - bar.left) % dayWidth;
-       const left = (box.left - bar.left) - (gap > dayWidth / 2 ? (gap - dayWidth / 2) : gap);
+       //  const gap = (box.left - bar.left) % dayWidth;
+       //  const left = (box.left - bar.left) - (gap > dayWidth / 2 ? (gap - dayWidth / 2) : gap);
 
-       const width = box.width + (gap > dayWidth / 2 ? (gap - dayWidth / 2) : gap);
 
-       resizedBox.style.left = left + 'px';
-       resizedBox.style.width = width + 'px'
+       //  const width = box.width + (gap > dayWidth / 2 ? (gap - dayWidth / 2) : gap);
+
+       //  resizedBox.style.left = left + 'px';
+       //  resizedBox.style.width = width + 'px'
 
        UI.changeTiming(resizedBox);
 
@@ -376,7 +433,7 @@
        window.removeEventListener('mouseup', mouseup);
        resizedBox.parentElement.removeEventListener('mouseout', mouseup)
 
-       UI.drawChart()
+       UI.drawChart(currentScale)
      }
    }
    // изменяем время задачи от  размера и положения блока 
@@ -504,7 +561,7 @@
      UI.addTasksToList(taskItem);
      Store.setTask(taskItem);
 
-     UI.drawChart();
+     UI.drawChart(currentScale);
 
      //show successMessage - оповещение при успехе
      UI.showAlert('Task added', 'success');
@@ -524,4 +581,36 @@
  })
  document.querySelector('#dueDateColumn').addEventListener('click', () => {
    UI.displayTasks('dueDate')
+ })
+
+ //change chart scale
+ document.querySelector('.plusScale').addEventListener('click', () => {
+   if (currentScale < 8) {
+     currentScale++;
+     UI.drawChart(currentScale);
+   }
+ })
+ document.querySelector('.minusScale').addEventListener('click', () => {
+   if (currentScale > 1) {
+     currentScale--;
+     UI.drawChart(currentScale);
+   }
+ })
+
+ document.querySelector('.timing-wrapper').addEventListener('mouseenter', (e) => {
+   e.target.addEventListener('wheel', (event) => {
+     if (event.ctrlKey) {
+       event.preventDefault();
+       if (currentScale > 1 && event.deltaY < 0) {
+         currentScale--;
+
+         UI.drawChart(currentScale)
+       }
+       if (currentScale < 8 && event.deltaY > 0) {
+         currentScale++;
+
+         UI.drawChart(currentScale);
+       }
+     }
+   })
  })
