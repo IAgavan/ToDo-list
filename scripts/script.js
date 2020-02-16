@@ -586,31 +586,33 @@
  //change chart scale
  document.querySelector('.plusScale').addEventListener('click', () => {
    if (currentScale < 8) {
-     currentScale++;
+     currentScale += 0.5;
      UI.drawChart(currentScale);
    }
  })
  document.querySelector('.minusScale').addEventListener('click', () => {
    if (currentScale > 1) {
-     currentScale--;
+     currentScale -= 0.5;
      UI.drawChart(currentScale);
    }
  })
 
  document.querySelector('.timing-wrapper').addEventListener('mouseenter', (e) => {
-   e.target.addEventListener('wheel', (event) => {
+   e.target.addEventListener('mousewheel', (event) => {
      if (event.ctrlKey) {
        event.preventDefault();
-       if (currentScale > 1 && event.deltaY < 0) {
-         currentScale--;
+       if (currentScale > 1 && event.deltaY > 0) {
+         currentScale -= 0.5;
 
          UI.drawChart(currentScale)
        }
-       if (currentScale < 8 && event.deltaY > 0) {
-         currentScale++;
+       if (currentScale < 8 && event.deltaY < 0) {
+         currentScale += 0.5;
 
          UI.drawChart(currentScale);
        }
      }
    })
+ }, {
+   once: true
  })
