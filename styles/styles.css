@@ -2,6 +2,9 @@ small {
   font-size: 1rem;
 }
 
+form input[type="date"]{
+  min-width: 135px;
+}
 
 
 .alert {
@@ -15,8 +18,6 @@ small {
   transform: translateX(-50%) translateY(-50%);
   z-index: 3000;
 }
-
-
 
 .table th,
 .table td {
