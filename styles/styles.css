@@ -11,7 +11,7 @@ small {
   position: fixed;
   min-height: 5rem;
   left: 50vw;
-  top: 50vh;
+  top: 10vh;
   transform: translateX(-50%) translateY(-50%);
   z-index: 3000;
 }
@@ -96,31 +96,53 @@ table input {
 
 .taskChart {
   font-size: .75rem;
+  position: relative;
 }
 
 .taskName {
-  width: 500px;
-  min-width: 150px;
+  /* overflow:hidden; */
+  width: 100%;
+  
 
+}
+.tasksInChartHeader{
+  height: 60px;
 }
 
 .taskRow {
   min-height: 30px;
+  max-height: 30px;
 }
 
 .timing-wrapper {
  
   overflow-x: auto;
 }
+.scaleButtons {
+  position: absolute;
+  top: 5px;
+  right: 20px;
+  display: flex;
+  z-index: 1;
+  opacity: 0.5;
+}
+.scaleButtons:hover{
+  opacity: 1;
+}
+.scaleButtons>.btn{
+  min-width: 30px;
+}
 
 .timing{
   min-width: max-content;
 }
 
+.textInBox,
+.month,
 .day {
 
   vertical-align: middle;
-  min-width: 40px;
+ 
   text-align: center;
 }
 
@@ -132,7 +154,7 @@ table input {
 }
 
 .timeBlock {
-  cursor: move;
+  
   display: flex;
   justify-content: space-between;
   position: absolute;
@@ -147,3 +169,4 @@ table input {
   height: 100%;
   background-color: darkseagreen;
 }
+
