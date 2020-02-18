@@ -81,6 +81,9 @@
      })
 
      UI.drawChart();
+
+     const body = document.querySelector('body');
+     body.style.minHeight = body.getBoundingClientRect().height;
    }
 
    // добавляем задачу в список задач 
