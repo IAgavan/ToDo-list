@@ -253,6 +253,7 @@
        }
 
        monthCell.style.width = daysInMonth * scale * minDayWidth + 'px';
+
        if (daysInMonth * scale * minDayWidth >= 40) {
          monthCell.innerHTML = month.toLocaleDateString('en-Gb', {
            year: '2-digit',
@@ -265,6 +266,8 @@
            month: 'long'
          });
        }
+
+
        monthScale.appendChild(monthCell);
      }
 
@@ -273,16 +276,21 @@
      for (let i = -1; i < daysOnScreen; i++) {
        const dateCell = document.createElement('div');
        let day = new Date(chartStartDate.getFullYear(), chartStartDate.getMonth(), chartStartDate.getDate() + i);
-
+       let innerDate = '';
+       innerDate = day.toLocaleDateString('en-Gb', {
+         month: 'short',
+         day: 'numeric'
+       })
+       dateCell.innerHTML = `<div class='dateTip bg-secondary border border-primary px-1'> ${innerDate}</div> ${day.toLocaleDateString('en-Gb', {
+        day: 'numeric'
+      })}`
        if (day.getDay() == 0 || day.getDay() == 6) {
          dateCell.classList.add('table-warning');
        }
        dateCell.classList.add("day", 'border', 'border-primary', 'py-1');
        dateCell.style.width = scale * minDayWidth + 'px';
-       if (scale > 3) {
-         dateCell.innerHTML = day.toLocaleDateString('en-Gb', {
-           day: 'numeric'
-         });
+       if (scale <= 3) {
+         dateCell.innerHTML = `<div class='dateTip bg-secondary border border-primary px-1'> ${innerDate}</div>`;
        }
 
        daysScale.appendChild(dateCell);
