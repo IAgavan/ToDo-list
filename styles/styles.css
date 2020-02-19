@@ -123,8 +123,7 @@ table input {
 }
 
 .timing-wrapper {
-
-  overflow-x: auto;
+  overflow-x: scroll;
 }
 
 .scaleButtons {
@@ -148,7 +147,7 @@ table input {
   min-width: max-content;
 }
 
-.days{
+.days {
   overflow-x: hidden;
 }
 
@@ -166,7 +165,7 @@ table input {
 .dateTip {
   position: absolute;
   top: 0;
-  left:0;
+  left: 0;
   display: none;
   width: 50px;
   z-index: 2;

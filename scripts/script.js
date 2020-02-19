@@ -238,7 +238,10 @@
      const firstDate = new Date(chartStartDate.getFullYear(), chartStartDate.getMonth(), chartStartDate.getDate() - 1);
      const lastDate = new Date(chartStartDate.getFullYear(), chartStartDate.getMonth(), chartStartDate.getDate() + daysOnScreen - 1);
 
-     for (let i = firstDate.getMonth(); i <= lastDate.getMonth(); i++) {
+     const monthsOnScreen = lastDate.getMonth() + (lastDate.getFullYear() - firstDate.getFullYear()) * 12 - firstDate.getMonth();
+
+
+     for (let i = firstDate.getMonth(); i <= monthsOnScreen + firstDate.getMonth(); i++) {
        const monthCell = document.createElement('div');
        let month = new Date(chartStartDate.getFullYear(), i);
 
@@ -248,7 +251,7 @@
        if (i == firstDate.getMonth()) {
          daysInMonth = daysInMonth - firstDate.getDate() + 1;
        }
-       if (i == lastDate.getMonth()) {
+       if (i == monthsOnScreen + firstDate.getMonth()) {
          daysInMonth = lastDate.getDate();
        }
 
