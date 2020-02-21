@@ -230,7 +230,6 @@
        }
        scale = currentScale;
      }
-
      const maxDaysOnScreen = Math.floor(daysScale.getBoundingClientRect().width / (scale * minDayWidth));
      const daysOnScreen = Math.max(totalDuration + 2, totalDuration + (maxDaysOnScreen - totalDuration) - 1);
 
@@ -269,8 +268,6 @@
            month: 'long'
          });
        }
-
-
        monthScale.appendChild(monthCell);
      }
 
@@ -298,8 +295,6 @@
 
        daysScale.appendChild(dateCell);
      }
-
-
 
 
      tasks.forEach(task => drawTaskOnChart(task));
@@ -344,8 +339,6 @@
          textInBox.innerHTML = '';
        }
      }
-
-
    }
 
    static moveBlock(e) {
@@ -375,13 +368,6 @@
      }
 
      function mouseup() {
-       //округляем до полудня     
-       //  const dayWidth = document.querySelector('.day').getBoundingClientRect().width;
-       //  const box = resizedBox.getBoundingClientRect();
-       //  const gap = (box.left - bar.left) % dayWidth;
-       //  const left = (box.left - bar.left) - (gap > dayWidth / 2 ? (gap - dayWidth / 2) : gap);
-       //  resizedBox.style.left = left + 'px';
-
        UI.changeTiming(resizedBox);
 
        window.removeEventListener('mousemove', mousemove);
@@ -427,20 +413,6 @@
      }
 
      function mouseup() {
-       //округляем до полудня
-
-       //  const dayWidth = document.querySelector('.day').getBoundingClientRect().width;
-       //  const box = resizedBox.getBoundingClientRect();
-
-       //  const gap = (box.left - bar.left) % dayWidth;
-       //  const left = (box.left - bar.left) - (gap > dayWidth / 2 ? (gap - dayWidth / 2) : gap);
-
-
-       //  const width = box.width + (gap > dayWidth / 2 ? (gap - dayWidth / 2) : gap);
-
-       //  resizedBox.style.left = left + 'px';
-       //  resizedBox.style.width = width + 'px'
-
        UI.changeTiming(resizedBox);
 
        window.removeEventListener('mousemove', mousemove);
@@ -483,8 +455,6 @@
      Store.editTask('startDate', startDateInput.value, changeTaskId);
      Store.editTask('dueDate', endDateInput.value, changeTaskId);
    }
-
-
 
    // удаляем задачу
    static removeTask(element) {
@@ -531,9 +501,6 @@
      document.querySelector('#dueDate').min = '';
    }
  }
-
-
-
 
 
  // ~~~~~~~~~~~~~~~~~~~~~EVENTS - СОБЫТИЯ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
